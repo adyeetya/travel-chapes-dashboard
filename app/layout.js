@@ -27,3 +27,503 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+
+// ----------
+ // <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-gray-50 rounded-lg shadow-md">
+        //   <h1 className="text-2xl font-bold text-center mb-6">Create Trip Plan</h1>
+
+        //   {/* Basic Fields */}
+        //   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">ID</label>
+        //       <input
+        //         type="text"
+        //         name="id"
+        //         value={tripPlan.id}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Name</label>
+        //       <input
+        //         type="text"
+        //         name="name"
+        //         value={tripPlan.name}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Title</label>
+        //       <input
+        //         type="text"
+        //         name="title"
+        //         value={tripPlan.title}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Route</label>
+        //       <input
+        //         type="text"
+        //         name="route"
+        //         value={tripPlan.route}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Duration</label>
+        //       <input
+        //         type="text"
+        //         name="duration"
+        //         value={tripPlan.duration}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Age Group</label>
+        //       <input
+        //         type="text"
+        //         name="ageGroup"
+        //         value={tripPlan.ageGroup}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Minimum Price</label>
+        //       <input
+        //         type="text"
+        //         name="minPrice"
+        //         value={tripPlan.minPrice}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //   </div>
+
+        //   {/* Dynamic Arrays */}
+        //   <div className="space-y-4">
+        //     {/* Category */}
+        //     <div>
+        //     <label className="block text-sm font-medium text-gray-700">Category</label>
+        //     {tripPlan.category.map((category, index) => (
+        //       <div key={index} className="flex items-center space-x-2 mt-2">
+        //         <input
+        //           type="text"
+        //           value={category}
+        //           onChange={(e) => handleArrayChange(e, 'category', index)}
+        //           className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //         />
+        //         <button
+        //           type="button"
+        //           onClick={() => removeArrayItem('category', index)}
+        //           className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //         >
+        //           Remove
+        //         </button>
+        //       </div>
+        //     ))}
+        //     <button
+        //       type="button"
+        //       onClick={() => addArrayItem('category', '')}
+        //       className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //     >
+        //       Add Category
+        //     </button>
+        //   </div>
+
+        //     {/* Batches */}
+        //     <div>
+        //     <label className="block text-sm font-medium text-gray-700">Batches</label>
+        //     {tripPlan.batch.map((batch, batchIndex) => (
+        //       <div key={batchIndex} className="mt-4 p-4 border border-gray-200 rounded-lg">
+        //         <div className="space-y-2">
+        //           <input
+        //             type="text"
+        //             name="date"
+        //             value={batch.date}
+        //             onChange={(e) => handleArrayChange(e, 'batch', batchIndex)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Date"
+        //           />
+        //           {batch.transports.map((transport, transportIndex) => (
+        //             <div key={transportIndex} className="space-y-2">
+        //               <input
+        //                 type="text"
+        //                 name="type"
+        //                 value={transport.type}
+        //                 onChange={(e) =>
+        //                   handleArrayChange(e, 'batch', batchIndex, 'transports', transportIndex)
+        //                 }
+        //                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 placeholder="Transport Type"
+        //               />
+        //               <input
+        //                 type="text"
+        //                 name="costTripleSharing"
+        //                 value={transport.costTripleSharing}
+        //                 onChange={(e) =>
+        //                   handleArrayChange(e, 'batch', batchIndex, 'transports', transportIndex)
+        //                 }
+        //                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 placeholder="Cost (Triple Sharing)"
+        //               />
+        //               <input
+        //                 type="text"
+        //                 name="costDoubleSharing"
+        //                 value={transport.costDoubleSharing}
+        //                 onChange={(e) =>
+        //                   handleArrayChange(e, 'batch', batchIndex, 'transports', transportIndex)
+        //                 }
+        //                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //                 placeholder="Cost (Double Sharing)"
+        //               />
+        //               <button
+        //                 type="button"
+        //                 onClick={() => removeArrayItem('batch', batchIndex, 'transports', transportIndex)}
+        //                 className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //               >
+        //                 Remove Transport
+        //               </button>
+        //             </div>
+        //           ))}
+        //           <button
+        //             type="button"
+        //             onClick={() => addTransport(batchIndex)}
+        //             className="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //           >
+        //             Add Transport
+        //           </button>
+        //         </div>
+        //         <button
+        //           type="button"
+        //           onClick={() => removeArrayItem('batch', batchIndex)}
+        //           className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //         >
+        //           Remove Batch
+        //         </button>
+        //       </div>
+        //     ))}
+        //     <button
+        //       type="button"
+        //       onClick={() => addArrayItem('batch', { date: '', transports: [] })}
+        //       className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //     >
+        //       Add Batch
+        //     </button>
+        //   </div>
+
+
+        //     {/* Banners */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Banners</label>
+        //       <div className="space-y-2">
+        //         <input
+        //           type="text"
+        //           name="phone"
+        //           value={tripPlan.banners.phone}
+        //           onChange={(e) => setTripPlan({ ...tripPlan, banners: { ...tripPlan.banners, phone: e.target.value } })}
+        //           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //           placeholder="Phone Banner URL"
+        //         />
+        //         <input
+        //           type="text"
+        //           name="web"
+        //           value={tripPlan.banners.web}
+        //           onChange={(e) => setTripPlan({ ...tripPlan, banners: { ...tripPlan.banners, web: e.target.value } })}
+        //           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //           placeholder="Web Banner URL"
+        //         />
+        //       </div>
+        //     </div>
+
+        //     {/* Images */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Images</label>
+        //       {tripPlan.images.map((image, index) => (
+        //         <div key={index} className="flex items-center space-x-2 mt-2">
+        //           <input
+        //             type="text"
+        //             value={image}
+        //             onChange={(e) => handleArrayChange(e, 'images', index)}
+        //             className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('images', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('images', '')}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Image
+        //       </button>
+        //     </div>
+
+        //     {/* Meta Fields */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Meta Title</label>
+        //       <input
+        //         type="text"
+        //         name="metaTitle"
+        //         value={tripPlan.metaTitle}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Meta Description</label>
+        //       <input
+        //         type="text"
+        //         name="metaDescription"
+        //         value={tripPlan.metaDescription}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Headline</label>
+        //       <input
+        //         type="text"
+        //         name="headline"
+        //         value={tripPlan.headline}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Description</label>
+        //       <textarea
+        //         name="description"
+        //         value={tripPlan.description}
+        //         onChange={handleChange}
+        //         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //       />
+        //     </div>
+
+        //     {/* Short Itinerary */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Short Itinerary</label>
+        //       {tripPlan.shortItinerary.map((itinerary, index) => (
+        //         <div key={index} className="space-y-2 mt-2">
+        //           <input
+        //             type="text"
+        //             name="day"
+        //             value={itinerary.day}
+        //             onChange={(e) => handleArrayChange(e, 'shortItinerary', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Day"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="description"
+        //             value={itinerary.description}
+        //             onChange={(e) => handleArrayChange(e, 'shortItinerary', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Description"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('shortItinerary', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('shortItinerary', { day: '', description: '' })}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Short Itinerary
+        //       </button>
+        //     </div>
+
+        //     {/* Full Itinerary */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Full Itinerary</label>
+        //       {tripPlan.fullItinerary.map((itinerary, index) => (
+        //         <div key={index} className="space-y-2 mt-2">
+        //           <input
+        //             type="text"
+        //             name="day"
+        //             value={itinerary.day}
+        //             onChange={(e) => handleArrayChange(e, 'fullItinerary', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Day"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="title"
+        //             value={itinerary.title}
+        //             onChange={(e) => handleArrayChange(e, 'fullItinerary', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Title"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="description"
+        //             value={itinerary.description}
+        //             onChange={(e) => handleArrayChange(e, 'fullItinerary', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Description"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('fullItinerary', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('fullItinerary', { day: '', title: '', description: '' })}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Full Itinerary
+        //       </button>
+        //     </div>
+
+        //     {/* Inclusions */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Inclusions</label>
+        //       {tripPlan.inclusions.map((inclusion, index) => (
+        //         <div key={index} className="space-y-2 mt-2">
+        //           <input
+        //             type="text"
+        //             name="title"
+        //             value={inclusion.title}
+        //             onChange={(e) => handleArrayChange(e, 'inclusions', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Title"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="description"
+        //             value={inclusion.description}
+        //             onChange={(e) => handleArrayChange(e, 'inclusions', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Description"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('inclusions', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('inclusions', { title: '', description: '' })}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Inclusion
+        //       </button>
+        //     </div>
+
+        //     {/* Exclusions */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Exclusions</label>
+        //       {tripPlan.exclusions.map((exclusion, index) => (
+        //         <div key={index} className="space-y-2 mt-2">
+        //           <input
+        //             type="text"
+        //             name="title"
+        //             value={exclusion.title}
+        //             onChange={(e) => handleArrayChange(e, 'exclusions', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Title"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="description"
+        //             value={exclusion.description}
+        //             onChange={(e) => handleArrayChange(e, 'exclusions', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Description"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('exclusions', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('exclusions', { title: '', description: '' })}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Exclusion
+        //       </button>
+        //     </div>
+
+        //     {/* Important Points */}
+        //     <div>
+        //       <label className="block text-sm font-medium text-gray-700">Important Points</label>
+        //       {tripPlan.importantPoints.map((point, index) => (
+        //         <div key={index} className="space-y-2 mt-2">
+        //           <input
+        //             type="text"
+        //             name="title"
+        //             value={point.title}
+        //             onChange={(e) => handleArrayChange(e, 'importantPoints', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Title"
+        //           />
+        //           <input
+        //             type="text"
+        //             name="description"
+        //             value={point.description}
+        //             onChange={(e) => handleArrayChange(e, 'importantPoints', index)}
+        //             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        //             placeholder="Description"
+        //           />
+        //           <button
+        //             type="button"
+        //             onClick={() => removeArrayItem('importantPoints', index)}
+        //             className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        //           >
+        //             Remove
+        //           </button>
+        //         </div>
+        //       ))}
+        //       <button
+        //         type="button"
+        //         onClick={() => addArrayItem('importantPoints', { title: '', description: '' })}
+        //         className="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600"
+        //       >
+        //         Add Important Point
+        //       </button>
+        //     </div>
+        //   </div>
+
+        //   {/* Submit Button */}
+        //   <div className="text-center">
+        //     <button
+        //       type="submit"
+        //       className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600"
+        //     >
+        //       Submit Trip Plan
+        //     </button>
+        //   </div>
+        // </form>
