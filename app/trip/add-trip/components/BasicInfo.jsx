@@ -1,9 +1,26 @@
-const BasicInfo = ({ tripPlan, setTripPlan }) => {
+'use client';
+
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+const BasicInfo = ({ tripPlan, setTripPlan}) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setTripPlan({ ...tripPlan, [name]: value });
     };
 
+    const descriptionEditor = useEditor({
+      extensions: [StarterKit],
+      content: tripPlan.description,
+  
+      immediatelyRender: false,
+  
+      onUpdate: ({ editor }) => {
+        setTripPlan((prev) => ({
+          ...prev,
+          description: editor.getHTML(),
+        }));
+      },
+    });
     return (
         <section className="bg-gray-50 p-6 rounded-lg">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Basic Information</h2>
@@ -38,15 +55,47 @@ const BasicInfo = ({ tripPlan, setTripPlan }) => {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                     />
                 </div>
-                <div>
+                <div className="md:col-span-2"> {/* Make description span full width */}
                     <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <textarea
-                        name="description"
-                        value={tripPlan.description}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        rows="4"
-                    />
+                    <div className="border border-gray-300 rounded-lg overflow-hidden">
+                        {/* Toolbar */}
+                        <div className="flex flex-wrap gap-1 p-2 border-b border-gray-300 bg-gray-100">
+                            <button
+                                type="button"
+                                onClick={() => descriptionEditor?.chain().focus().toggleBold().run()}
+                                className={`p-2 rounded hover:bg-gray-200 ${descriptionEditor?.isActive('bold') ? 'bg-gray-300' : ''}`}
+                            >
+                                <strong>B</strong>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => descriptionEditor?.chain().focus().toggleItalic().run()}
+                                className={`p-2 rounded hover:bg-gray-200 ${descriptionEditor?.isActive('italic') ? 'bg-gray-300' : ''}`}
+                            >
+                                Italics
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => descriptionEditor?.chain().focus().toggleBulletList().run()}
+                                className={`p-2 rounded hover:bg-gray-200 ${descriptionEditor?.isActive('bulletList') ? 'bg-gray-300' : ''}`}
+                            >
+                                • List
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => descriptionEditor?.chain().focus().toggleOrderedList().run()}
+                                className={`p-2 rounded hover:bg-gray-200 ${descriptionEditor?.isActive('orderedList') ? 'bg-gray-300' : ''}`}
+                            >
+                                1. List
+                            </button>
+                        </div>
+                        
+                        {/* Editor content */}
+                        <EditorContent 
+                            editor={descriptionEditor}
+                            className="min-h-[200px] p-4 focus:outline-none bg-white"
+                        />
+                    </div>
                 </div>
                 {['id', 'name', 'title', 'route', 'ageGroup', 'minPrice'].map((field) => (
                     <div key={field}>
