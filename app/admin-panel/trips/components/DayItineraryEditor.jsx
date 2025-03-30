@@ -7,6 +7,7 @@ const DayItineraryEditor = ({ day, content, onContentChange }) => {
   const editor = useEditor({
     extensions: [StarterKit],
     content: content || "",
+    immediatelyRender: false,
   });
 
   useEffect(() => {

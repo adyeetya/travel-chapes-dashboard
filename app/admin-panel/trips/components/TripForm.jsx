@@ -1,5 +1,5 @@
 "use client";
-import { useState} from "react";
+import { useState } from "react";
 import LocationSelector from "./LocationSelector";
 import Calendar from "./Calendar";
 
@@ -8,13 +8,14 @@ import HotelSelector from "./HotelSelector";
 import PriceInput from "./PriceInput";
 import MealSelector from "./MealSelector";
 import DayItineraryEditor from "./DayItineraryEditor";
-const TripForm = ({ closeForm }) => {
+const TripForm = ({ closeForm, planIds }) => {
   const dummyLocations = ["Delhi", "Mumbai", "Goa"];
   const dummyVehicles = ["Car", "Bus"];
   const dummyHotels = ["Hotel A", "Hotel B"];
 
   const [step, setStep] = useState(1);
   const [tripData, setTripData] = useState({
+    slug: "",
     location: "",
     pickup: "",
     viaPoints: [""],
@@ -29,24 +30,24 @@ const TripForm = ({ closeForm }) => {
     pricing: { car: {}, bus: {}, gst: 0 },
   });
 
-
-
-
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrev = () => setStep((prev) => prev - 1);
-  
+
   const updateTripData = (field, value) => {
     setTripData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleItineraryChange = (dayIndex, content) => {
-    setTripData(prev => {
+    setTripData((prev) => {
       const newItinerary = [...prev.itinerary];
       newItinerary[dayIndex] = content;
       return { ...prev, itinerary: newItinerary };
     });
   };
 
+  const handleIdChange = (e) => {
+    setTripData(prev => ({ ...prev, slug: e.target.value }));
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -54,7 +55,7 @@ const TripForm = ({ closeForm }) => {
         <div className="p-6 border-b">
           <h2 className="text-2xl font-bold text-gray-800">Create New Trip</h2>
         </div>
-        
+
         {/* Progress indicator */}
         <div className="px-6 pt-4 pb-2">
           <div className="flex justify-between">
@@ -62,16 +63,20 @@ const TripForm = ({ closeForm }) => {
               <div key={stepNumber} className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center 
-                    ${step >= stepNumber ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}`}
+                    ${
+                      step >= stepNumber
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
                 >
                   {stepNumber}
                 </div>
                 <span className="text-xs mt-1 text-gray-500">
-                  {stepNumber === 1 && 'Location'}
-                  {stepNumber === 2 && 'Dates'}
-                  {stepNumber === 3 && 'Itinerary'}
-                  {stepNumber === 4 && 'Services'}
-                  {stepNumber === 5 && 'Pricing'}
+                  {stepNumber === 1 && "Location"}
+                  {stepNumber === 2 && "Dates"}
+                  {stepNumber === 3 && "Itinerary"}
+                  {stepNumber === 4 && "Services"}
+                  {stepNumber === 5 && "Pricing"}
                 </span>
               </div>
             ))}
@@ -81,11 +86,33 @@ const TripForm = ({ closeForm }) => {
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto p-6">
           {step === 1 && (
-            <LocationSelector
-              tripData={tripData}
-              updateTripData={updateTripData}
-              locations={dummyLocations}
-            />
+            <div className="space-y-6">
+              {/* Add this selector at the top of step 1 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Trip Plan
+                </label>
+                <select
+                  value={tripData.slug}
+                  onChange={handleIdChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="">Select a trip ID</option>
+                  {planIds.map((id) => (
+                    <option key={id} value={id}>
+                      {id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <LocationSelector
+                tripData={tripData}
+                updateTripData={updateTripData}
+                locations={dummyLocations}
+              />
+            </div>
           )}
 
           {step === 2 && (
@@ -94,7 +121,9 @@ const TripForm = ({ closeForm }) => {
 
           {step === 3 && (
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-700">Add Itinerary Details</h3>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Add Itinerary Details
+              </h3>
               <div className="space-y-6">
                 {Array.from({ length: tripData.days }).map((_, index) => (
                   <DayItineraryEditor
@@ -120,7 +149,10 @@ const TripForm = ({ closeForm }) => {
                 updateTripData={updateTripData}
                 hotels={dummyHotels}
               />
-              <MealSelector tripData={tripData} updateTripData={updateTripData} />
+              <MealSelector
+                tripData={tripData}
+                updateTripData={updateTripData}
+              />
             </div>
           )}
 
@@ -137,7 +169,7 @@ const TripForm = ({ closeForm }) => {
           >
             Cancel
           </button>
-          
+
           <div className="space-x-3">
             {step > 1 && (
               <button
@@ -147,7 +179,7 @@ const TripForm = ({ closeForm }) => {
                 Back
               </button>
             )}
-            
+
             {step < 5 ? (
               <button
                 onClick={handleNext}

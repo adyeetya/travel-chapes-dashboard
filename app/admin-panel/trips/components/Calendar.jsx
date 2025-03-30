@@ -2,12 +2,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Calendar = ({ tripData, updateTripData }) => {
-  const handleDateChange = (date, field) => {
-    updateTripData(field, date);
+  const handleDateChange = (dates) => {
+    const [start, end] = dates;
+    updateTripData("startDate", start);
+    updateTripData("endDate", end);
 
-    if (field === "endDate" && tripData.startDate) {
+    if (start && end) {
       const days = Math.ceil(
-        (date - new Date(tripData.startDate)) / (1000 * 60 * 60 * 24)
+        (end - start) / (1000 * 60 * 60 * 24)
       );
       updateTripData("days", days + 1);
     }
@@ -15,21 +17,20 @@ const Calendar = ({ tripData, updateTripData }) => {
 
   return (
     <div>
-      <label>Start Date:</label>
+      <label>Trip Dates:</label>
       <DatePicker
-        selected={tripData.startDate}
-        onChange={(date) => handleDateChange(date, "startDate")}
+        selectsRange
+        startDate={tripData.startDate}
+        endDate={tripData.endDate}
+        onChange={handleDateChange}
         className="p-2 border"
+        isClearable
+        placeholderText="Select date range"
       />
 
-      <label className="ml-4">End Date:</label>
-      <DatePicker
-        selected={tripData.endDate}
-        onChange={(date) => handleDateChange(date, "endDate")}
-        className="p-2 border"
-      />
-
-      {tripData.days > 0 && <p>Total Days: {tripData.days}</p>}
+      {tripData.days > 0 && (
+        <p className="mt-2">Total Days: {tripData.days}</p>
+      )}
     </div>
   );
 };
