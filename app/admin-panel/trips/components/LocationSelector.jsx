@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const LocationSelector = ({ tripData, updateTripData, locations }) => {
   const [pickup, setPickup] = useState("");
-  const [viaPoints, setViaPoints] = useState([]);
+  const [viaPoints, setViaPoints] = useState('');
   const [drop, setDrop] = useState("");
 
   // Handle pickup point change
@@ -14,20 +14,13 @@ const LocationSelector = ({ tripData, updateTripData, locations }) => {
   // Handle drop point change
   const handleDropChange = (value) => {
     setDrop(value);
-    updateTripData("drop", value);
+    updateTripData("locationId", value);
   };
 
   // Handle via points change (Add/Remove points)
   const handleViaPointChange = (value) => {
-    if (viaPoints.includes(value)) {
-      const updatedViaPoints = viaPoints.filter((point) => point !== value);
-      setViaPoints(updatedViaPoints);
-      updateTripData("viaPoints", updatedViaPoints);
-    } else {
-      const updatedViaPoints = [...viaPoints, value];
-      setViaPoints(updatedViaPoints);
-      updateTripData("viaPoints", updatedViaPoints);
-    }
+    setViaPoints(value);
+    updateTripData("viaPoints", value);
   };
 
   return (
@@ -43,27 +36,26 @@ const LocationSelector = ({ tripData, updateTripData, locations }) => {
       >
         <option value="">Select Pickup Point</option>
         {locations.map((location) => (
-          <option key={location} value={location}>
-            {location}
+          <option key={location._id} value={location.city}>
+            {location.city}
           </option>
         ))}
       </select>
 
       {/* Via Points (Multiple Selection) */}
-      <label className="block mb-2">Via Points (Optional):</label>
+      
       <div className="space-y-2 mb-4">
-        {locations.map((location) => (
-          <label key={location} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              value={location}
-              checked={viaPoints.includes(location)}
-              onChange={() => handleViaPointChange(location)}
-              className="w-4 h-4"
-            />
-            <span>{location}</span>
-          </label>
-        ))}
+
+      <label className="block mb-2">Via Points (Optional):</label>
+      <input
+        type="text"
+        value={viaPoints}
+        onChange={(e) => handleViaPointChange(e.target.value)}
+        placeholder="Enter via points separated by commas"
+        className="p-2 border rounded-md w-full mb-4"
+      />
+
+
       </div>
 
       {/* Drop Point */}
@@ -75,8 +67,8 @@ const LocationSelector = ({ tripData, updateTripData, locations }) => {
       >
         <option value="">Select Drop Point</option>
         {locations.map((location) => (
-          <option key={location} value={location}>
-            {location}
+          <option key={location._id} value={location._id}>
+            {location.city}
           </option>
         ))}
       </select>

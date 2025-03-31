@@ -20,7 +20,7 @@ const VehiclesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const token = auth.getToken();
   useEffect(() => {
-    const fetchHotels = async () => {
+    const fetchVehicle = async () => {
       try {
         const response = await axios.get(
           `${ServerUrl}/tripRequirement/getVehicalList`,
@@ -39,7 +39,7 @@ const VehiclesPage = () => {
         setError("Failed to fetch vehicles");
       }
     };
-    fetchHotels();
+    fetchVehicle();
   }, []);
 
 

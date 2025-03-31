@@ -25,8 +25,8 @@ const HotelSelector = ({ tripData, updateTripData, hotels }) => {
           >
             <option value="">No Hotel</option>
             {hotels.map((hotel) => (
-              <option key={hotel} value={hotel}>
-                {hotel}
+              <option key={hotel._id} value={hotel._id}>
+                {hotel.name}
               </option>
             ))}
           </select>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LocationSelector from "./LocationSelector";
 import Calendar from "./Calendar";
 
@@ -8,18 +8,17 @@ import HotelSelector from "./HotelSelector";
 import PriceInput from "./PriceInput";
 import MealSelector from "./MealSelector";
 import DayItineraryEditor from "./DayItineraryEditor";
-const TripForm = ({ closeForm, planIds }) => {
-  const dummyLocations = ["Delhi", "Mumbai", "Goa"];
-  const dummyVehicles = ["Car", "Bus"];
-  const dummyHotels = ["Hotel A", "Hotel B"];
+const TripForm = ({ closeForm,onSave, planIds, locations, hotels, vehicles }) => {
+
+
 
   const [step, setStep] = useState(1);
   const [tripData, setTripData] = useState({
     slug: "",
-    location: "",
+    locationId: "",
     pickup: "",
     viaPoints: [""],
-    drop: "",
+   
     startDate: "",
     endDate: "",
     days: 0,
@@ -27,9 +26,12 @@ const TripForm = ({ closeForm, planIds }) => {
     vehicles: [],
     stays: [],
     meals: [],
-    pricing: { car: {}, bus: {}, gst: 0 },
+    pricing: { car: {}, bus: {} },
+    gst: 18,
   });
-
+useEffect(() => {
+  console.log('trip data:>>>>', tripData);
+}, [tripData]);
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrev = () => setStep((prev) => prev - 1);
 
@@ -110,7 +112,7 @@ const TripForm = ({ closeForm, planIds }) => {
               <LocationSelector
                 tripData={tripData}
                 updateTripData={updateTripData}
-                locations={dummyLocations}
+                locations={locations}
               />
             </div>
           )}
@@ -142,12 +144,12 @@ const TripForm = ({ closeForm, planIds }) => {
               <VehicleSelector
                 tripData={tripData}
                 updateTripData={updateTripData}
-                vehicles={dummyVehicles}
+                vehicles={vehicles}
               />
               <HotelSelector
                 tripData={tripData}
                 updateTripData={updateTripData}
-                hotels={dummyHotels}
+                hotels={hotels}
               />
               <MealSelector
                 tripData={tripData}
@@ -157,7 +159,7 @@ const TripForm = ({ closeForm, planIds }) => {
           )}
 
           {step === 5 && (
-            <PriceInput tripData={tripData} updateTripData={updateTripData} />
+            <PriceInput tripData={tripData} updateTripData={updateTripData} vehicles={vehicles} />
           )}
         </div>
 
@@ -189,7 +191,7 @@ const TripForm = ({ closeForm, planIds }) => {
               </button>
             ) : (
               <button
-                onClick={() => console.log("Submit:", tripData)}
+                onClick={()=>onSave(tripData)}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
               >
                 Submit Trip
