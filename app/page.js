@@ -51,6 +51,7 @@ export default function Home() {
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          
           <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6">
           <MdCardTravel className="text-5xl text-blue-700"/>
             <h3 className="mt-4 text-xl font-bold">52</h3>
