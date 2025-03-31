@@ -89,7 +89,21 @@ export const getUserFromToken = () => {
   if (!token) return null;
 
   const decoded = decodeToken(token);
+  console.log('decoded:>', decoded)
   return decoded ? decoded.user : null;
+};
+
+export const getAdminFromToken = () => {
+  const token = getToken();
+  if (!token) return null;
+
+  const decoded = decodeToken(token);
+  // console.log('decoded:>', decoded)
+  if(decoded?.adminType === 'ADMIN'){
+    return decoded
+  }
+  return null
+  
 };
 
 /**
@@ -110,5 +124,6 @@ export default {
   verifyToken,
   isAuthenticated,
   getUserFromToken,
+  getAdminFromToken,
   redirectToLogin,
 };

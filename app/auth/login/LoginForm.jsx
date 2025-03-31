@@ -11,7 +11,7 @@ export default function LoginForm({ setStep, setEmail, serverUrl }) {
     e.preventDefault();
     try {
       // Sending the data in the exact format required by the backend
-      const response = await axios.post(`${serverUrl}/api/v1/admin/loginOtp`, {
+      const response = await axios.post(`${serverUrl}/admin/loginOtp`, {
         email: email.toLowerCase(), // Convert email to lowercase
         password, // Include password
       });

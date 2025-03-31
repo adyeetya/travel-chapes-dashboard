@@ -1,17 +1,18 @@
 'use client'
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { setToken, isAuthenticated } from "@/utils/auth";
 export default function OTPForm({ email, serverUrl }) {
     const [otp, setOtp] = useState(""); // OTP state
     const [error, setError] = useState(""); // Error message state
     const [success, setSuccess] = useState(null); // Login success state
-
+const router = useRouter()
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             // Sending the data in the exact format required by the backend
-            const response = await axios.put(`${serverUrl}/api/v1/admin/verifyLoginOtp`, {
+            const response = await axios.put(`${serverUrl}/admin/verifyLoginOtp`, {
                 email: email.toLowerCase(), // Ensure email matches backend format
                 otp: Number(otp), // OTP as a number
             });
@@ -23,6 +24,10 @@ export default function OTPForm({ email, serverUrl }) {
             if(isAuthenticated()){
             setSuccess("Login Successful"); // Indicate login success
             }
+
+            setTimeout(() => {
+               router.push('/')
+              }, "2000");
            
         } catch (err) {
             setError(err.response?.data?.message || "Invalid OTP");
@@ -31,7 +36,7 @@ export default function OTPForm({ email, serverUrl }) {
 
     const handleResendOtp = async () => {
         try {
-            const response = await axios.post(`${serverUrl}/api/v1/admin/resendOtp`, {
+            const response = await axios.post(`${serverUrl}/admin/resendOtp`, {
                 email: email.toLowerCase(), // Ensure email matches backend format
 
             });
