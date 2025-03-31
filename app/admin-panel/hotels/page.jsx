@@ -27,7 +27,12 @@ const token = auth.getToken()
     setLoading(true);
     setError("");
     try {
-      const { data } = await axios.post(`${ServerUrl}/tripRequirement/createHotel`, form);
+      const { data } = await axios.post(`${ServerUrl}/tripRequirement/createHotel`, form, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log('create hotel:',data)
       setHotels([...hotels, data]);
       setShowModal(false);
