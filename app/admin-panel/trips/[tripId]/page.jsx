@@ -139,6 +139,8 @@ const TripDetailsPage = ({ params }) => {
         payments: [],
       };
 
+      console.log('customer data:',customerData)
+
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 300));
 
@@ -168,6 +170,10 @@ const TripDetailsPage = ({ params }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log(customers)
+  },[customers])
 
   const addPayment = async () => {
     if (!selectedCustomer) return;
