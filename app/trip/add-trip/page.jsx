@@ -22,9 +22,9 @@ const TripPlanForm = () => {
     slug: "",
     name: "",
     title: "",
-   
+
     route: "",
-   
+
     category: [],
     ageGroup: "",
     minPrice: "",
@@ -58,17 +58,26 @@ const TripPlanForm = () => {
 
     try {
       // Validate required fields before submission
-      if (!tripPlan.slug || !tripPlan.name || !tripPlan.route || !tripPlan.minPrice) {
+      if (
+        !tripPlan.slug ||
+        !tripPlan.name ||
+        !tripPlan.route ||
+        !tripPlan.minPrice
+      ) {
         throw new Error("Please fill all required fields");
       }
 
-      const response = await axios.post(`${ServerUrl}/tripPlans/createTripPlans`, tripPlan, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log('response:', response.data)
+      const response = await axios.post(
+        `${ServerUrl}/tripPlans/createTripPlans`,
+        tripPlan,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("response:", response.data);
       setSubmitStatus({
         success: true,
         message: "Trip plan created successfully!",
@@ -142,50 +151,51 @@ const TripPlanForm = () => {
               Create Trip Plan
             </h1>
 
-          {/* Status Messages */}
-          {submitStatus.message && (
-            <div
-              className={`mb-6 p-4 rounded-lg ${submitStatus.success
-                  ? "bg-green-50 text-green-800"
-                  : "bg-red-50 text-red-800"
+            {/* Status Messages */}
+            {submitStatus.message && (
+              <div
+                className={`mb-6 p-4 rounded-lg ${
+                  submitStatus.success
+                    ? "bg-green-50 text-green-800"
+                    : "bg-red-50 text-red-800"
                 }`}
-            >
-              <div className="flex items-center">
-                {submitStatus.success ? (
-                  <FiCheckCircle className="h-5 w-5 mr-2" />
-                ) : (
-                  <FiAlertCircle className="h-5 w-5 mr-2" />
-                )}
-                <p>{submitStatus.message}</p>
-              </div>
-              {renderErrorMessages()}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <BasicInfo tripPlan={tripPlan} setTripPlan={setTripPlan} />
-
-            <Categories tripPlan={tripPlan} setTripPlan={setTripPlan} />
-            <FullItinerary tripPlan={tripPlan} setTripPlan={setTripPlan} />
-
-            <Inclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
-            <Exclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
-            <ImportantPoints tripPlan={tripPlan} setTripPlan={setTripPlan} />
-            <Banners tripPlan={tripPlan} setTripPlan={setTripPlan} />
-            <Images tripPlan={tripPlan} setTripPlan={setTripPlan} />
-
-            <div className="text-center">
-              <button
-                type="submit"
-                className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
               >
-                Submit Trip Plan
-              </button>
-            </div>
-          </form>
+                <div className="flex items-center">
+                  {submitStatus.success ? (
+                    <FiCheckCircle className="h-5 w-5 mr-2" />
+                  ) : (
+                    <FiAlertCircle className="h-5 w-5 mr-2" />
+                  )}
+                  <p>{submitStatus.message}</p>
+                </div>
+                {renderErrorMessages()}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <BasicInfo tripPlan={tripPlan} setTripPlan={setTripPlan} />
+
+              <Categories tripPlan={tripPlan} setTripPlan={setTripPlan} />
+              <FullItinerary tripPlan={tripPlan} setTripPlan={setTripPlan} />
+
+              <Inclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
+              <Exclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
+              <ImportantPoints tripPlan={tripPlan} setTripPlan={setTripPlan} />
+              <Banners tripPlan={tripPlan} setTripPlan={setTripPlan} />
+              <Images tripPlan={tripPlan} setTripPlan={setTripPlan} />
+
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Submit Trip Plan
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
     </ProtectedRoute>
   );
 };

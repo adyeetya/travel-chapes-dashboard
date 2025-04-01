@@ -10,10 +10,11 @@ import { AddPaymentModal } from "./components/AddPaymentModal";
 import { ServerUrl } from "@/app/config";
 import axios from "axios";
 import auth from "@/utils/auth";
+import ProtectedRoute from "@/components/ProtectedRoutes";
 const TripDetailsPage = ({ params }) => {
   const router = useRouter();
   const tripId = use(params).tripId;
-  const token = auth.getToken()
+  const token = auth.getToken();
 
   // State and data initialization
   const [trip, setTrip] = useState({});
@@ -21,7 +22,7 @@ const TripDetailsPage = ({ params }) => {
   const [tempTrip, setTempTrip] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Customer and payment state
   const [customers, setCustomers] = useState([]);
   const [newCustomer, setNewCustomer] = useState({
@@ -41,21 +42,23 @@ const TripDetailsPage = ({ params }) => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-
-
   // Simulate API fetch
   useEffect(() => {
     const fetchTripData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`${ServerUrl}/tripRequirement/viewTrip?_id=${tripId}`,  {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(response.data.result)
-        if (response.data && response.data.result) { // Assuming your response wrapper has a 'data' property
+        const response = await axios.get(
+          `${ServerUrl}/tripRequirement/viewTrip?_id=${tripId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data.result);
+        if (response.data && response.data.result) {
+          // Assuming your response wrapper has a 'data' property
           setTrip(response.data.result);
         } else {
           console.error("Unexpected response format:", response);
@@ -67,8 +70,9 @@ const TripDetailsPage = ({ params }) => {
         setLoading(false);
       }
     };
-  
-    if (tripId) { // Only fetch if tripId exists
+
+    if (tripId) {
+      // Only fetch if tripId exists
       fetchTripData();
     }
   }, [tripId]);
@@ -99,7 +103,7 @@ const TripDetailsPage = ({ params }) => {
         payments: [],
       };
 
-      console.log('customer data:',customerData)
+      console.log("customer data:", customerData);
 
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -132,15 +136,15 @@ const TripDetailsPage = ({ params }) => {
   };
 
   useEffect(() => {
-    console.log(customers)
-  },[customers])
+    console.log(customers);
+  }, [customers]);
 
   const addPayment = async () => {
     if (!selectedCustomer) return;
 
     try {
       setLoading(true);
-console.log('new payment:',newPayment)
+      console.log("new payment:", newPayment);
       const customer = customers.find((c) => c._id === selectedCustomer);
       const { balance } = calculatePaymentSummary(customer);
 
@@ -213,7 +217,7 @@ console.log('new payment:',newPayment)
       console.log("Sending to API:", updatedTrip);
       // const response = await updateTripApi(updatedTrip);
       // setTrip(response.data);
-      
+
       // For now, just update local state
       setTrip(updatedTrip);
     } catch (error) {
@@ -223,54 +227,51 @@ console.log('new payment:',newPayment)
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TripHeader trip={trip} onBack={() => router.back()} />
-      
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-      <TripOverview 
-        trip={trip} 
-        loading={loading} 
-        onSave={handleSaveTrip} 
-      />
-        
-        {/* <ItinerarySection
+    <ProtectedRoute adminOnly={true}>
+      <div className="min-h-screen bg-gray-50">
+        <TripHeader trip={trip} onBack={() => router.back()} />
+
+        <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <TripOverview trip={trip} loading={loading} onSave={handleSaveTrip} />
+
+          {/* <ItinerarySection
           itinerary={editMode ? tempTrip.itinerary : trip.itinerary}
           editMode={editMode}
           onItineraryChange={handleItineraryChange}
         /> */}
-        
-        <CustomersSection
-          customers={customers}
-          onAddCustomer={() => setShowCustomerForm(true)}
-          onAddPayment={(customerId) => {
-            setSelectedCustomer(customerId);
-            setShowPaymentForm(true);
-          }}
-        />
-      </main>
 
-      <AddCustomerModal
-        isOpen={showCustomerForm}
-        onClose={() => setShowCustomerForm(false)}
-        customerData={newCustomer}
-        onCustomerChange={(field, value) => 
-          setNewCustomer(prev => ({ ...prev, [field]: value }))
-        }
-        onSubmit={addCustomer}
-        loading={loading}
-      />
-      
-      <AddPaymentModal
-        isOpen={showPaymentForm}
-        onClose={() => setShowPaymentForm(false)}
-        onSubmit={addPayment}
-        loading={loading}
-        payment={newPayment}
-        setPayment={setNewPayment}
-      />
-    </div>
+          <CustomersSection
+            customers={customers}
+            onAddCustomer={() => setShowCustomerForm(true)}
+            onAddPayment={(customerId) => {
+              setSelectedCustomer(customerId);
+              setShowPaymentForm(true);
+            }}
+          />
+        </main>
+
+        <AddCustomerModal
+          isOpen={showCustomerForm}
+          onClose={() => setShowCustomerForm(false)}
+          customerData={newCustomer}
+          onCustomerChange={(field, value) =>
+            setNewCustomer((prev) => ({ ...prev, [field]: value }))
+          }
+          onSubmit={addCustomer}
+          loading={loading}
+        />
+
+        <AddPaymentModal
+          isOpen={showPaymentForm}
+          onClose={() => setShowPaymentForm(false)}
+          onSubmit={addPayment}
+          loading={loading}
+          payment={newPayment}
+          setPayment={setNewPayment}
+        />
+      </div>
+    </ProtectedRoute>
   );
 };
 
