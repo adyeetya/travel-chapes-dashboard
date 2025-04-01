@@ -7,62 +7,16 @@ import { ItinerarySection } from "./components/ItinerarySection";
 import { CustomersSection } from "./components/CustomersSection";
 import { AddCustomerModal } from "./components/AddCustomerModal";
 import { AddPaymentModal } from "./components/AddPaymentModal";
-
+import { ServerUrl } from "@/app/config";
+import axios from "axios";
+import auth from "@/utils/auth";
 const TripDetailsPage = ({ params }) => {
   const router = useRouter();
   const tripId = use(params).tripId;
+  const token = auth.getToken()
 
   // State and data initialization
-  const [trip, setTrip] = useState({
-    id: "1",
-    location: "Golden Triangle",
-    pickup: "Delhi",
-    viaPoints: ["Agra", "Jaipur"],
-    drop: "Delhi",
-    startDate: "2025-04-10",
-    endDate: "2025-04-14",
-    days: 5,
-    itinerary: [
-      {
-        day: 1,
-        title: "Arrival in Goa",
-        description: "Check-in at hotel, evening beach visit",
-        activities: [
-          "Hotel check-in",
-          "Anjuna Beach visit",
-          "Dinner at local restaurant",
-        ],
-      },
-      {
-        day: 2,
-        title: "North Goa Exploration",
-        description: "Full day tour of North Goa beaches and forts",
-        activities: [
-          "Baga Beach",
-          "Fort Aguada",
-          "Chapora Fort",
-          "Night market",
-        ],
-      },
-    ],
-    vehicles: ["Car", "Bus"],
-    stays: ["Hotel Taj", "Jaipur Palace", "Delhi Grand"],
-    meals: ["Breakfast", "Lunch", "Dinner"],
-    pricing: {
-      car: {
-        single: 25000,
-        double: 22000,
-        triple: 20000,
-      },
-      bus: {
-        single: 18000,
-        double: 16000,
-        triple: 14000,
-      },
-      gst: 18,
-    },
-    customerIds: [],
-  });
+  const [trip, setTrip] = useState({});
 
   const [tempTrip, setTempTrip] = useState({});
   const [editMode, setEditMode] = useState(false);
@@ -94,23 +48,29 @@ const TripDetailsPage = ({ params }) => {
     const fetchTripData = async () => {
       setLoading(true);
       try {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // In a real app, you would fetch from your API
-        // const res = await fetch(`/api/trips/${tripId}`);
-        // const data = await res.json();
-
-        // Using our dummy data directly
-        setTempTrip({ ...trip });
+        const response = await axios.get(`${ServerUrl}/tripRequirement/viewTrip?_id=${tripId}`,  {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response.data.result)
+        if (response.data && response.data.result) { // Assuming your response wrapper has a 'data' property
+          setTrip(response.data.result);
+        } else {
+          console.error("Unexpected response format:", response);
+        }
       } catch (error) {
         console.error("Failed to fetch trip data:", error);
+        // You might want to handle errors here, like showing a notification
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTripData();
+  
+    if (tripId) { // Only fetch if tripId exists
+      fetchTripData();
+    }
   }, [tripId]);
 
   const saveTripChanges = async () => {
@@ -275,11 +235,11 @@ console.log('new payment:',newPayment)
         onSave={handleSaveTrip} 
       />
         
-        <ItinerarySection
+        {/* <ItinerarySection
           itinerary={editMode ? tempTrip.itinerary : trip.itinerary}
           editMode={editMode}
           onItineraryChange={handleItineraryChange}
-        />
+        /> */}
         
         <CustomersSection
           customers={customers}

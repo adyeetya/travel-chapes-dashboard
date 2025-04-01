@@ -17,7 +17,7 @@ const TripForm = ({ closeForm,onSave, planIds, locations, hotels, vehicles }) =>
     slug: "",
     locationId: "",
     pickup: "",
-    viaPoints: [""],
+    viaPoints: "",
    
     startDate: "",
     endDate: "",

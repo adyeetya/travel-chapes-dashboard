@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ServerUrl } from "@/app/config";
 import auth from "@/utils/auth";
-
+import { IoIosArrowRoundBack } from "react-icons/io";
+import Link from "next/link";
 const LocationsPage = () => {
   const [locations, setLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
@@ -116,7 +117,18 @@ const LocationsPage = () => {
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Locations Management</h1>
+        <div>
+            <Link
+              href="/admin-panel/trips"
+              className="text-sm hover:text-blue-500 flex justify-start items-center"
+            >
+              <IoIosArrowRoundBack />
+              Trips
+            </Link>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Locations Management
+            </h1>
+          </div>
           <button
             onClick={() => setShowModal(true)}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition duration-200 flex items-center"

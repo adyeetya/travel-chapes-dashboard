@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const TripOverview = ({ trip, loading, onSave }) => {
   const [editMode, setEditMode] = useState(false);
   const [tempTrip, setTempTrip] = useState(trip);
 
   // Update tempTrip when trip prop changes
-  useState(() => {
+  useEffect(() => {
     setTempTrip(trip);
   }, [trip]);
 
@@ -20,7 +20,7 @@ export const TripOverview = ({ trip, loading, onSave }) => {
       pricing: {
         ...prev.pricing,
         [vehicle.toLowerCase()]: {
-          ...prev.pricing[vehicle.toLowerCase()],
+          ...prev.pricing?.[vehicle.toLowerCase()] || {},
           [type]: Number(value),
         },
       },
@@ -30,37 +30,33 @@ export const TripOverview = ({ trip, loading, onSave }) => {
   const handleGSTChange = (value) => {
     setTempTrip(prev => ({
       ...prev,
-      pricing: {
-        ...prev.pricing,
-        gst: Number(value),
-      },
+      gst: Number(value),
     }));
   };
 
-  const handleItineraryChange = (index, field, value) => {
+  const handleItineraryChange = (index, value) => {
     const updatedItinerary = [...tempTrip.itinerary];
-    updatedItinerary[index] = {
-      ...updatedItinerary[index],
-      [field]: value,
-    };
+    updatedItinerary[index] = value;
     setTempTrip(prev => ({ ...prev, itinerary: updatedItinerary }));
   };
 
   const handleSave = () => {
-    console.log("Saving trip data:", tempTrip);
-    // Here you would typically call your API
-    // For now, we'll just log the data and call the onSave prop
     onSave(tempTrip);
     setEditMode(false);
+  };
+
+  // Helper to get vehicle types from pricing object
+  const getVehicleTypes = () => {
+    return Object.keys(tempTrip.pricing || {});
   };
 
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden mb-6">
       <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">
-          {trip.location} Trip Overview
+          Trip Overview
           <span className="ml-2 text-sm font-normal text-gray-500">
-            (ID: {trip.id})
+           {trip.slug} | (ID: {trip._id})
           </span>
         </h2>
         <button
@@ -89,20 +85,20 @@ export const TripOverview = ({ trip, loading, onSave }) => {
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="date"
-                  value={tempTrip.startDate}
-                  onChange={(e) => handleChange("startDate", e.target.value)}
+                  value={tempTrip.startDate?.split('T')[0] || ''}
+                  onChange={(e) => handleChange("startDate", `${e.target.value}T00:00:00.000Z`)}
                   className="p-2 border rounded-md"
                 />
                 <input
                   type="date"
-                  value={tempTrip.endDate}
-                  onChange={(e) => handleChange("endDate", e.target.value)}
+                  value={tempTrip.endDate?.split('T')[0] || ''}
+                  onChange={(e) => handleChange("endDate", `${e.target.value}T00:00:00.000Z`)}
                   className="p-2 border rounded-md"
                 />
               </div>
             ) : (
               <p className="text-gray-900">
-                {trip.startDate} to {trip.endDate} ({trip.days} days)
+                {new Date(trip.startDate).toLocaleDateString()} to {new Date(trip.endDate).toLocaleDateString()} ({trip.days} days)
               </p>
             )}
           </div>
@@ -113,35 +109,49 @@ export const TripOverview = ({ trip, loading, onSave }) => {
               <div className="space-y-2">
                 <input
                   type="text"
-                  value={tempTrip.pickup}
+                  value={tempTrip.pickup || ''}
                   onChange={(e) => handleChange("pickup", e.target.value)}
                   placeholder="Pickup location"
                   className="w-full p-2 border rounded-md"
                 />
                 <input
                   type="text"
-                  value={tempTrip.viaPoints.join(", ")}
-                  onChange={(e) =>
-                    handleChange(
-                      "viaPoints",
-                      e.target.value.split(",").map((s) => s.trim())
-                    )
-                  }
-                  placeholder="Via points (comma separated)"
-                  className="w-full p-2 border rounded-md"
-                />
-                <input
-                  type="text"
-                  value={tempTrip.drop}
-                  onChange={(e) => handleChange("drop", e.target.value)}
-                  placeholder="Drop location"
+                  value={tempTrip.viaPoints || ''}
+                  onChange={(e) => handleChange("viaPoints", e.target.value)}
+                  placeholder="Via points"
                   className="w-full p-2 border rounded-md"
                 />
               </div>
             ) : (
               <p className="text-gray-900">
-                {trip.pickup} → {trip.viaPoints.join(" → ")} → {trip.drop}
+                {trip.pickup} → {trip.viaPoints}
               </p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray-500 mb-1">Itinerary</h3>
+            {editMode ? (
+              <div className="space-y-2">
+                {tempTrip.itinerary?.map((day, index) => (
+                  <textarea
+                    key={index}
+                    value={day || ''}
+                    onChange={(e) => handleItineraryChange(index, e.target.value)}
+                    placeholder={`Day ${index + 1}`}
+                    className="w-full p-2 border rounded-md"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {trip.itinerary?.map((day, index) => (
+                  <div key={index} className="flex gap-4 items-center">
+                  {/* <div key={index} className="prose" dangerouslySetInnerHTML={{ __html: day }} /> */}
+                 <span className="text-xs text-gray-400">{index+1}.</span> <p>{day}</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -151,43 +161,11 @@ export const TripOverview = ({ trip, loading, onSave }) => {
               <div className="space-y-2">
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">
-                    Vehicles
-                  </label>
-                  <input
-                    type="text"
-                    value={tempTrip.vehicles.join(", ")}
-                    onChange={(e) =>
-                      handleChange(
-                        "vehicles",
-                        e.target.value.split(",").map((s) => s.trim())
-                      )
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">
-                    Stays
-                  </label>
-                  <input
-                    type="text"
-                    value={tempTrip.stays.join(", ")}
-                    onChange={(e) =>
-                      handleChange(
-                        "stays",
-                        e.target.value.split(",").map((s) => s.trim())
-                      )
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">
                     Meals
                   </label>
                   <input
                     type="text"
-                    value={tempTrip.meals.join(", ")}
+                    value={tempTrip.meals?.join(", ") || ''}
                     onChange={(e) =>
                       handleChange(
                         "meals",
@@ -201,16 +179,8 @@ export const TripOverview = ({ trip, loading, onSave }) => {
             ) : (
               <div className="space-y-1">
                 <p className="text-gray-900">
-                  <span className="font-medium">Vehicles:</span>{" "}
-                  {trip.vehicles.join(", ")}
-                </p>
-                <p className="text-gray-900">
-                  <span className="font-medium">Stays:</span>{" "}
-                  {trip.stays.join(", ")}
-                </p>
-                <p className="text-gray-900">
                   <span className="font-medium">Meals:</span>{" "}
-                  {trip.meals.join(", ")}
+                  {trip.meals?.join(", ") || 'None'}
                 </p>
               </div>
             )}
@@ -222,10 +192,10 @@ export const TripOverview = ({ trip, loading, onSave }) => {
           <h3 className="text-sm font-medium text-gray-500 mb-1">Pricing</h3>
           {editMode ? (
             <div className="space-y-4">
-              {trip.vehicles.map((vehicle) => (
+              {getVehicleTypes().map((vehicle) => (
                 <div key={vehicle}>
                   <label className="block text-xs text-gray-500 mb-1">
-                    {vehicle} Prices (₹)
+                    {vehicle.charAt(0).toUpperCase() + vehicle.slice(1)} Prices (₹)
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {["single", "double", "triple"].map((type) => (
@@ -233,7 +203,7 @@ export const TripOverview = ({ trip, loading, onSave }) => {
                         key={type}
                         placeholder={type.charAt(0).toUpperCase() + type.slice(1)}
                         value={
-                          tempTrip.pricing[vehicle.toLowerCase()]?.[type] || ""
+                          tempTrip.pricing?.[vehicle]?.[type] || ""
                         }
                         onChange={(e) =>
                           handlePricingChange(
@@ -253,7 +223,7 @@ export const TripOverview = ({ trip, loading, onSave }) => {
                   GST (%)
                 </label>
                 <input
-                  value={tempTrip.pricing.gst}
+                  value={tempTrip.gst || ''}
                   onChange={(e) => handleGSTChange(e.target.value)}
                   className="w-full p-2 border rounded-md"
                 />
@@ -261,17 +231,15 @@ export const TripOverview = ({ trip, loading, onSave }) => {
             </div>
           ) : (
             <div className="space-y-2">
-              {trip.vehicles.map((vehicle) => (
+              {getVehicleTypes().map((vehicle) => (
                 <div key={vehicle}>
-                  <span className="font-medium">{vehicle}:</span>
+                  <span className="font-medium">{vehicle.charAt(0).toUpperCase() + vehicle.slice(1)}:</span>
                   <div className="ml-2 text-sm">
                     {["single", "double", "triple"].map((type, i, arr) => (
                       <span key={type}>
                         <span>
                           {type.charAt(0).toUpperCase() + type.slice(1)}: ₹
-                          {trip.pricing[vehicle.toLowerCase()]?.[
-                            type
-                          ]?.toLocaleString() || "N/A"}
+                          {trip.pricing?.[vehicle]?.[type]?.toLocaleString() || "N/A"}
                         </span>
                         {i < arr.length - 1 && <span className="mx-2">|</span>}
                       </span>
@@ -280,7 +248,7 @@ export const TripOverview = ({ trip, loading, onSave }) => {
                 </div>
               ))}
               <p>
-                <span className="font-medium">GST:</span> {trip.pricing.gst}%
+                <span className="font-medium">GST:</span> {trip.gst}%
               </p>
             </div>
           )}
