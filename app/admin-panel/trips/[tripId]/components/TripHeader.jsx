@@ -25,7 +25,7 @@ export const TripHeader = ({ trip, onBack }) => {
           Back to Trips
         </button>
         <h1 className="text-2xl font-bold text-gray-900">
-          Trip Management Dashboard
+          Trip Management
         </h1>
         <div className="w-24"></div>
       </div>
