@@ -125,7 +125,7 @@ const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary }) => {
     <tr className="hover:bg-gray-50">
       <TableCell>{customer.name}</TableCell>
       <TableCell>{customer.contact}</TableCell>
-      <TableCell>{customer.people}</TableCell>
+      <TableCell>{customer.numOfPeople}</TableCell>
       <TableCell>₹{customer.agreedPrice.toLocaleString()}</TableCell>
       <TableCell>₹{totalPaid.toLocaleString()}</TableCell>
       <TableCell className={balance > 0 ? "text-red-600" : "text-green-600"}>

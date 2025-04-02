@@ -31,11 +31,11 @@ export const AddCustomerModal = ({
           />
           <FormField
             label="Number of People"
-            id="people"
+            id="numOfPeople"
             type="number"
             min="1"
-            value={customerData.people}
-            onChange={(value) => onCustomerChange("people", Number(value))}
+            value={customerData.numOfPeople}
+            onChange={(value) => onCustomerChange("numOfPeople", Number(value))}
           />
           <FormField
             label="Agreed Price (₹)"

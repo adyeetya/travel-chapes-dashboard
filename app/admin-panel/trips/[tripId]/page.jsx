@@ -12,6 +12,10 @@ import axios from "axios";
 import auth from "@/utils/auth";
 import ProtectedRoute from "@/components/ProtectedRoutes";
 const TripDetailsPage = ({ params }) => {
+  // .post("/createCustomer", controller.createCustomer)
+  // .post("/addPayment", controller.addPayment)
+  // .get("/getCustomerList", controller.getcustomerList)
+
   const router = useRouter();
   const tripId = use(params).tripId;
   const token = auth.getToken();
@@ -29,7 +33,7 @@ const TripDetailsPage = ({ params }) => {
     name: "",
     contact: "",
     agreedPrice: 0,
-    people: 1,
+    numOfPeople: 1,
   });
 
   const [newPayment, setNewPayment] = useState({
@@ -42,7 +46,7 @@ const TripDetailsPage = ({ params }) => {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  // Simulate API fetch
+  //  API fetch trip
   useEffect(() => {
     const fetchTripData = async () => {
       setLoading(true);
@@ -77,6 +81,38 @@ const TripDetailsPage = ({ params }) => {
     }
   }, [tripId]);
 
+  useEffect(()=>{
+    const fetchCustomers = async()=> {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `${ServerUrl}/customer/getCustomerList?_id=${tripId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        // console.log('customer of this trip:',response.data.result);
+        if (response.data && response.data.result) {
+          // Assuming your response wrapper has a 'data' property
+          setCustomers(response.data.result);
+        } else {
+          console.error("Unexpected response format:", response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch trip data:", error);
+        // You might want to handle errors here, like showing a notification
+      } finally {
+        setLoading(false);
+      }
+     
+    }
+
+    fetchCustomers()
+  },[tripId])
+
   const saveTripChanges = async () => {
     setLoading(true);
     try {
@@ -100,25 +136,26 @@ const TripDetailsPage = ({ params }) => {
       const customerData = {
         ...newCustomer,
         tripId,
-        payments: [],
       };
 
       console.log("customer data:", customerData);
 
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const response = await axios.post(
+        `${ServerUrl}/customer/createCustomer`,
+        customerData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data.result);
 
-      const mockResponse = {
-        _id: Math.random().toString(36).substring(2, 15),
-        ...customerData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setCustomers((prev) => [...prev, mockResponse]);
+      setCustomers((prev) => [...prev, response.data.result]);
       setTrip((prev) => ({
         ...prev,
-        customerIds: [...(prev.customerIds || []), mockResponse._id],
+        customerIds: [...(prev.customerIds || []), response.data.result._id],
       }));
 
       setShowCustomerForm(false);
@@ -126,7 +163,7 @@ const TripDetailsPage = ({ params }) => {
         name: "",
         contact: "",
         agreedPrice: 0,
-        people: 1,
+        numOfPeople: 1,
       });
     } catch (error) {
       console.error("Error adding customer:", error);
@@ -144,7 +181,7 @@ const TripDetailsPage = ({ params }) => {
 
     try {
       setLoading(true);
-      console.log("new payment:", newPayment);
+      
       const customer = customers.find((c) => c._id === selectedCustomer);
       const { balance } = calculatePaymentSummary(customer);
 
@@ -159,26 +196,28 @@ const TripDetailsPage = ({ params }) => {
       }
 
       const paymentData = {
-        ...newPayment,
-        date: new Date().toISOString().split("T")[0],
+        _id:customer._id,
+        payment:newPayment,
+        
       };
+      console.log('data payment: ', paymentData)
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+    const res = await axios.post(`${ServerUrl}/customer/addPayment`, paymentData,  {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
 
-      const mockPayment = {
-        _id: Math.random().toString(36).substring(2, 15),
-        ...paymentData,
-        createdAt: new Date().toISOString(),
-      };
+     console.log(res.data)
 
-      setCustomers((prev) =>
-        prev.map((customer) =>
-          customer._id === selectedCustomer
-            ? { ...customer, payments: [...customer.payments, mockPayment] }
-            : customer
-        )
-      );
+     setCustomers((prevCustomers) =>
+      prevCustomers.map((c) =>
+        c._id === selectedCustomer
+          ? { ...c, payments: res.data.result.payments } // Update only the matching customer
+          : c
+      )
+    );
+   
 
       setShowPaymentForm(false);
       setNewPayment({
@@ -194,6 +233,10 @@ const TripDetailsPage = ({ params }) => {
     }
   };
 
+  useEffect(()=>{
+    console.log('customers:>>>', customers)
+  },[customers])
+
   const calculatePaymentSummary = (customer) => {
     const totalPaid =
       customer.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
@@ -201,14 +244,6 @@ const TripDetailsPage = ({ params }) => {
     return { totalPaid, balance };
   };
 
-  const handleItineraryChange = (index, field, value) => {
-    const updatedItinerary = [...tempTrip.itinerary];
-    updatedItinerary[index] = {
-      ...updatedItinerary[index],
-      [field]: value,
-    };
-    setTempTrip({ ...tempTrip, itinerary: updatedItinerary });
-  };
 
   const handleSaveTrip = async (updatedTrip) => {
     setLoading(true);

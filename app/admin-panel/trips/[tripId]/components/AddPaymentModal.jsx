@@ -64,7 +64,7 @@ export const AddPaymentModal = ({
             >
               <option value="online">Online Transfer</option>
               <option value="cash">Cash</option>
-              <option value="cheque">Cheque</option>
+           
             </select>
           </div>
           
