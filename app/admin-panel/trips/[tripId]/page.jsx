@@ -60,9 +60,9 @@ const TripDetailsPage = ({ params }) => {
             },
           }
         );
-        console.log(response.data.result);
+      
         if (response.data && response.data.result) {
-          // Assuming your response wrapper has a 'data' property
+         
           setTrip(response.data.result);
         } else {
           console.error("Unexpected response format:", response);
@@ -81,8 +81,8 @@ const TripDetailsPage = ({ params }) => {
     }
   }, [tripId]);
 
-  useEffect(()=>{
-    const fetchCustomers = async()=> {
+  useEffect(() => {
+    const fetchCustomers = async () => {
       setLoading(true);
       try {
         const response = await axios.get(
@@ -94,24 +94,30 @@ const TripDetailsPage = ({ params }) => {
             },
           }
         );
-        // console.log('customer of this trip:',response.data.result);
+        
         if (response.data && response.data.result) {
           // Assuming your response wrapper has a 'data' property
           setCustomers(response.data.result);
         } else {
           console.error("Unexpected response format:", response);
         }
+
+        
       } catch (error) {
-        console.error("Failed to fetch trip data:", error);
-        // You might want to handle errors here, like showing a notification
+        
+        if(error.status === 404){
+          console.log('No Customers Found')
+        }else{
+          console.error("Failed to fetch trip data:", error);
+        }
+        
       } finally {
         setLoading(false);
       }
-     
-    }
+    };
 
-    fetchCustomers()
-  },[tripId])
+    fetchCustomers();
+  }, [tripId]);
 
   const saveTripChanges = async () => {
     setLoading(true);
@@ -138,7 +144,7 @@ const TripDetailsPage = ({ params }) => {
         tripId,
       };
 
-      console.log("customer data:", customerData);
+    
 
       // Simulate API delay
       const response = await axios.post(
@@ -150,7 +156,7 @@ const TripDetailsPage = ({ params }) => {
           },
         }
       );
-      console.log(response.data.result);
+   
 
       setCustomers((prev) => [...prev, response.data.result]);
       setTrip((prev) => ({
@@ -172,16 +178,14 @@ const TripDetailsPage = ({ params }) => {
     }
   };
 
-  useEffect(() => {
-    console.log(customers);
-  }, [customers]);
+
 
   const addPayment = async () => {
     if (!selectedCustomer) return;
 
     try {
       setLoading(true);
-      
+
       const customer = customers.find((c) => c._id === selectedCustomer);
       const { balance } = calculatePaymentSummary(customer);
 
@@ -196,28 +200,30 @@ const TripDetailsPage = ({ params }) => {
       }
 
       const paymentData = {
-        _id:customer._id,
-        payment:newPayment,
-        
+        _id: customer._id,
+        payment: newPayment,
       };
-      console.log('data payment: ', paymentData)
+    
 
-    const res = await axios.post(`${ServerUrl}/customer/addPayment`, paymentData,  {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+      const res = await axios.post(
+        `${ServerUrl}/customer/addPayment`,
+        paymentData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-     console.log(res.data)
+    
 
-     setCustomers((prevCustomers) =>
-      prevCustomers.map((c) =>
-        c._id === selectedCustomer
-          ? { ...c, payments: res.data.result.payments } // Update only the matching customer
-          : c
-      )
-    );
-   
+      setCustomers((prevCustomers) =>
+        prevCustomers.map((c) =>
+          c._id === selectedCustomer
+            ? { ...c, payments: res.data.result.payments } // Update only the matching customer
+            : c
+        )
+      );
 
       setShowPaymentForm(false);
       setNewPayment({
@@ -233,9 +239,7 @@ const TripDetailsPage = ({ params }) => {
     }
   };
 
-  useEffect(()=>{
-    console.log('customers:>>>', customers)
-  },[customers])
+
 
   const calculatePaymentSummary = (customer) => {
     const totalPaid =
@@ -243,7 +247,6 @@ const TripDetailsPage = ({ params }) => {
     const balance = Math.max(0, customer.agreedPrice - totalPaid);
     return { totalPaid, balance };
   };
-
 
   const handleSaveTrip = async (updatedTrip) => {
     setLoading(true);
@@ -262,6 +265,26 @@ const TripDetailsPage = ({ params }) => {
     }
   };
 
+  const handleDelete = async () => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this trip?");
+    if (!isConfirmed) return;
+    try {
+      await axios.delete(
+        `${ServerUrl}/tripRequirement/deleteTrip`,
+        {
+          data: { _id: tripId }, 
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      router.back()
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <ProtectedRoute adminOnly={true}>
       <div className="min-h-screen bg-gray-50">
@@ -269,12 +292,6 @@ const TripDetailsPage = ({ params }) => {
 
         <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <TripOverview trip={trip} loading={loading} onSave={handleSaveTrip} />
-
-          {/* <ItinerarySection
-          itinerary={editMode ? tempTrip.itinerary : trip.itinerary}
-          editMode={editMode}
-          onItineraryChange={handleItineraryChange}
-        /> */}
 
           <CustomersSection
             customers={customers}
@@ -284,6 +301,14 @@ const TripDetailsPage = ({ params }) => {
               setShowPaymentForm(true);
             }}
           />
+          <div className="mt-4 w-full flex justify-end">
+            <button
+              onClick={handleDelete}
+              className="bg-red-500 text-white rounded px-2 py-1 text-sm"
+            >
+              Delete
+            </button>
+          </div>
         </main>
 
         <AddCustomerModal
