@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { ServerUrl } from "@/app/config";
 import Link from "next/link";
@@ -10,14 +10,15 @@ const TripsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredTrips, setFilteredTrips] = useState([]);
+  // const [filteredTrips, setFilteredTrips] = useState([]);
 
   useEffect(() => {
     const fetchTrips = async () => {
       try {
         const response = await axios.post(`${ServerUrl}/tripPlans/getAllTripPlans`);
+        // console.log('res',response.data)
         setTrips(response.data?.result?.docs || []);
-        setFilteredTrips(response.data?.result?.docs || []);
+        // setFilteredTrips(response.data?.result?.docs || []);
       } catch (err) {
         console.error("Error fetching trips:", err);
         setError("Failed to fetch trips. Please try again later.");
@@ -30,16 +31,24 @@ const TripsPage = () => {
 
 
 
-  useEffect(() => {
-    const filtered = trips.filter(
-      (vehicle) =>
-        vehicle?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle?.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle?.contact?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle?.maxPeople?.toString().includes(searchTerm)
-    );
-    setFilteredTrips(filtered);
-  }, [searchTerm, trips]);
+  const filteredTrips = useMemo(() => {
+    if (!searchTerm) return trips;
+    
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    
+    return trips.filter(trip => {
+      // Check if title matches
+      const titleMatch = trip.title?.toLowerCase().includes(lowerCaseSearchTerm);
+      
+      // Check if any category matches
+      const categoryMatch = trip.category?.some(cat => 
+        cat.toLowerCase().includes(lowerCaseSearchTerm)
+      );
+      
+      return titleMatch || categoryMatch;
+    });
+  }, [trips, searchTerm]);
+
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -140,7 +149,7 @@ const TripsPage = () => {
                   ))}
                 </div>
 
-                <div className="mb-4">
+                {/* <div className="mb-4">
                   <h4 className="font-medium text-gray-700 mb-1">Upcoming Batches:</h4>
                   <ul className="text-sm text-gray-600">
                     {trip.batch?.slice(0, 2).map((batch) => (
@@ -150,7 +159,7 @@ const TripsPage = () => {
                       </li>
                     ))}
                   </ul>
-                </div>
+                </div> */}
 
                 <Link
                   href={`/trips/${trip._id}?tripName=${trip.slug}`}

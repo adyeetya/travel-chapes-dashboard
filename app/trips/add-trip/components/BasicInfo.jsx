@@ -97,7 +97,7 @@ const BasicInfo = ({ tripPlan, setTripPlan}) => {
                         />
                     </div>
                 </div>
-                {['slug', 'name', 'title', 'route', 'ageGroup', 'minPrice'].map((field) => (
+                {['slug', 'title', 'route', 'ageGroup', 'minPrice'].map((field) => (
                     <div key={field}>
                         <label className="block text-sm font-medium text-gray-700 capitalize mb-2">
                             {field.replace(/([A-Z])/g, ' $1').trim()}

@@ -5,11 +5,14 @@ import { ServerUrl } from "@/app/config";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoutes";
+
 const AdminTripDetails = ({ params }) => {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const tripId = use(params).tripId;
+
+
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -47,7 +50,7 @@ const AdminTripDetails = ({ params }) => {
 
       console.log(res.data);
 
-      router.back()
+      router.back();
     } catch (error) {
       console.log(error);
     }

@@ -20,7 +20,7 @@ const TripPlanForm = () => {
   const token = getToken();
   const [tripPlan, setTripPlan] = useState({
     slug: "",
-    name: "",
+    
     title: "",
 
     route: "",
@@ -60,7 +60,7 @@ const TripPlanForm = () => {
       // Validate required fields before submission
       if (
         !tripPlan.slug ||
-        !tripPlan.name ||
+        !tripPlan.title ||
         !tripPlan.route ||
         !tripPlan.minPrice
       ) {

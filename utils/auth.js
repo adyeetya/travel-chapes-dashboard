@@ -89,8 +89,8 @@ export const getUserFromToken = () => {
   if (!token) return null;
 
   const decoded = decodeToken(token);
-  console.log('decoded:>', decoded)
-  return decoded ? decoded.user : null;
+
+  return decoded ? decoded : null;
 };
 
 export const getAdminFromToken = () => {

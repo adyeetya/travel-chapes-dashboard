@@ -40,6 +40,7 @@ const TripsPage = () => {
     fetchIds();
   }, []);
 
+  // fetch hotels
   useEffect(() => {
     const fetchHotels = async () => {
       try {
@@ -63,6 +64,7 @@ const TripsPage = () => {
     fetchHotels();
   }, []);
 
+// fetcvh vehicles
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
@@ -85,6 +87,7 @@ const TripsPage = () => {
     fetchVehicle();
   }, []);
 
+  // fetch locations
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -109,6 +112,7 @@ const TripsPage = () => {
     fetchLocations();
   }, [token]);
 
+  // fetch trips
   useEffect(() => {
     const fetchTrips = async () => {
       try {
@@ -122,6 +126,8 @@ const TripsPage = () => {
             },
           }
         );
+        console.log("trips>", response.data?.result);
+
         setTrips(response.data?.result || []);
         setFilteredTrips(response.data?.result || []);
       } catch (err) {
@@ -138,18 +144,35 @@ const TripsPage = () => {
     if (searchTerm.trim() === "") {
       setFilteredTrips(trips);
     } else {
-      const filtered = trips.filter(
-        (trip) =>
-          trip.locationId?.city
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          trip.pickup?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          trip.drop?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          trip.viaPoints?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const filtered = trips.filter((trip) => {
+        const city = trip.locationId?.city?.toLowerCase() || "";
+        const pickup = trip.pickup?.toLowerCase() || "";
+        const drop = trip.drop?.toLowerCase() || "";
+        const viaPoints = trip.viaPoints?.toLowerCase() || "";
+  
+        const startDate = trip.startDate
+          ? new Date(trip.startDate).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }).toLowerCase() // e.g., "31 Mar 2025"
+          : "";
+  
+        const search = searchTerm.toLowerCase();
+  
+        return (
+          city.includes(search) ||
+          pickup.includes(search) ||
+          drop.includes(search) ||
+          viaPoints.includes(search) ||
+          startDate.includes(search)
+        );
+      });
+  
       setFilteredTrips(filtered);
     }
   }, [searchTerm, trips]);
+  
 
   const handleSave = async (newTrip) => {
     try {
@@ -213,7 +236,7 @@ const TripsPage = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search trips by location, pickup, drop or via points..."
+                placeholder="Search trips by start date, location, pickup, drop or via points..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -302,11 +325,9 @@ const TripsPage = () => {
                       Dates
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Price (Car)
+                      Lowest Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Price (Bus)
-                    </th>
+
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Actions
                     </th>
@@ -337,15 +358,18 @@ const TripsPage = () => {
                         ({trip.days} days)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {trip.pricing?.car?.single
-                          ? `₹${trip.pricing.car.single.toLocaleString()} (S)`
-                          : "N/A"}
+                        {(() => {
+                          const allPrices = Object.values(trip.pricing || {}) // Get all transport types
+                            .flatMap((option) => Object.values(option)) // Flatten all price values
+                            .filter((price) => typeof price === "number"); // Ensure values are numbers
+
+                          if (allPrices.length === 0) return "N/A";
+
+                          const minPrice = Math.min(...allPrices);
+                          return `₹${minPrice.toLocaleString()}`;
+                        })()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {trip.pricing?.bus?.single
-                          ? `₹${trip.pricing.bus.single.toLocaleString()} (S)`
-                          : "N/A"}
-                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Link
                           href={`/admin-panel/trips/${trip._id}?location=${trip.slug}`}
