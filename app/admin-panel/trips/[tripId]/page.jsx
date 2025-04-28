@@ -11,8 +11,11 @@ import { ServerUrl } from "@/app/config";
 import axios from "axios";
 import auth from "@/utils/auth";
 import ProtectedRoute from "@/components/ProtectedRoutes";
-import { getUserFromToken } from "@/utils/auth";
 const TripDetailsPage = ({ params }) => {
+  // .post("/createCustomer", controller.createCustomer)
+  // .post("/addPayment", controller.addPayment)
+  // .get("/getCustomerList", controller.getcustomerList)
+
   const router = useRouter();
   const tripId = use(params).tripId;
   const token = auth.getToken();
@@ -26,23 +29,11 @@ const TripDetailsPage = ({ params }) => {
 
   // Customer and payment state
   const [customers, setCustomers] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [newCustomerBooking, setNewCustomerBooking] = useState({
-    customer: {
-      name: "",
-      contact: "", // Will be validated
-    },
-    booking: {
-      tripId: tripId, // Should be passed as prop
-      noOfPeople: 1,
-      agreedPrice: 0,
-
-      payment: {
-        amount: 0,
-        method: "online",
-        status: "pending",
-      },
-    },
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    contact: "",
+    agreedPrice: 0,
+    numOfPeople: 1,
   });
 
   const [newPayment, setNewPayment] = useState({
@@ -53,15 +44,7 @@ const TripDetailsPage = ({ params }) => {
   });
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const user = getUserFromToken();
-
-  if (user) {
-    console.log("Logged-in user:", user);
-  } else {
-    console.log("No user is logged in or token is invalid");
-  }
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   //  API fetch trip
   useEffect(() => {
@@ -79,6 +62,7 @@ const TripDetailsPage = ({ params }) => {
         );
 
         if (response.data && response.data.result) {
+
           setTrip(response.data.result);
         } else {
           console.error("Unexpected response format:", response);
@@ -98,58 +82,42 @@ const TripDetailsPage = ({ params }) => {
   }, [tripId]);
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchCustomers = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`${ServerUrl}/booking/getBookingList`, {
-          params: {
-            tripId: tripId // optional filter
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await axios.get(
+          `${ServerUrl}/customer/getCustomerList?_id=${tripId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        setBookings(response.data.result);
+        );
+
+        if (response.data && response.data.result) {
+          // Assuming your response wrapper has a 'data' property
+          setCustomers(response.data.result);
+        } else {
+          console.error("Unexpected response format:", response);
+        }
+
+
       } catch (error) {
-        console.error("Failed to fetch bookings:", error);
+
+        if (error.status === 404) {
+          console.log('No Customers Found')
+        } else {
+          console.error("Failed to fetch trip data:", error);
+        }
+
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (tripId) {
-      fetchBookings();
-    }
+    fetchCustomers();
   }, [tripId]);
-
-  useEffect(() => {
-    const fetchCustomers = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${ServerUrl}/customer/getCustomerList?_id=${tripId}`, 
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            if (response.data && response.data.result) {
-                setCustomers(response.data.result);
-                
-                // Extract bookings from customers if needed
-                const allBookings = response.data.result.flatMap(c => c.bookings || []);
-                setBookings(allBookings);
-            }
-        } catch (error) {
-            console.error("Failed to fetch customers:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (tripId) {
-        fetchCustomers();
-    }
-}, [tripId]);
 
   const saveTripChanges = async () => {
     setLoading(true);
@@ -168,112 +136,116 @@ const TripDetailsPage = ({ params }) => {
     }
   };
 
-  const addCustomerWithBooking = async () => {
+  const addCustomer = async () => {
     try {
       setLoading(true);
-      const currentUser = getUserFromToken();
+      const customerData = {
+        ...newCustomer,
+        tripId,
+      };
 
-      // Validate phone number
-      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{7,15}$/;
-      if (!phoneRegex.test(newCustomerBooking.customer.contact)) {
-        alert("Please enter a valid phone number");
+
+
+      // Simulate API delay
+      const response = await axios.post(
+        `${ServerUrl}/customer/createCustomer`,
+        customerData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+
+      setCustomers((prev) => [...prev, response.data.result]);
+      setTrip((prev) => ({
+        ...prev,
+        customerIds: [...(prev.customerIds || []), response.data.result._id],
+      }));
+
+      setShowCustomerForm(false);
+      setNewCustomer({
+        name: "",
+        contact: "",
+        agreedPrice: 0,
+        numOfPeople: 1,
+      });
+    } catch (error) {
+      console.error("Error adding customer:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const addPayment = async () => {
+    if (!selectedCustomer) return;
+
+    try {
+      setLoading(true);
+
+      const customer = customers.find((c) => c._id === selectedCustomer);
+      const { balance } = calculatePaymentSummary(customer);
+
+      if (newPayment.amount <= 0) {
+        alert("Payment amount must be positive");
         return;
       }
 
-      // Create customer first
-      const customerResponse = await axios.post(
-        `${ServerUrl}/customer/createCustomer`,
+      if (balance === 0) {
+        alert("Customer has already paid in full");
+        return;
+      }
+
+      const paymentData = {
+        _id: customer._id,
+        payment: newPayment,
+      };
+
+
+      const res = await axios.post(
+        `${ServerUrl}/customer/addPayment`,
+        paymentData,
         {
-          name: newCustomerBooking.customer.name,
-          contact: newCustomerBooking.customer.contact,
-          createdBy: currentUser.userId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      // Then create booking with payment
-      const bookingResponse = await axios.post(
-        `${ServerUrl}/booking/createBooking`,
-        {
-          userId: customerResponse.data.result._id, // Link booking to customer
-          tripId: newCustomerBooking.booking.tripId,
-          noOfPeople: newCustomerBooking.booking.noOfPeople,
-          agreedPrice: newCustomerBooking.booking.agreedPrice,
-          specialRequirements: newCustomerBooking.booking.specialRequirements,
-          payments: [newCustomerBooking.booking.payment],
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
 
-      // Update state
-      setCustomers((prev) => [...prev, customerResponse.data.result]);
-      setBookings((prev) => [...prev, bookingResponse.data.result]);
 
-      // Reset form
-      setNewCustomerBooking({
-        customer: { name: "", contact: "" },
-        booking: {
-          tripId: newCustomerBooking.booking.tripId, // Keep same trip
-          noOfPeople: 1,
-          agreedPrice: 0,
-          specialRequirements: "",
-          payment: { amount: 0, method: "online", status: "pending" },
-        },
-      });
-
-      setShowCustomerForm(false);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to create customer and booking");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addPaymentToBooking = async (bookingId, paymentData) => {
-    try {
-      setLoading(true);
-
-      const response = await axios.post(
-        `${ServerUrl}/booking/addPayment`,
-        {
-          bookingId,
-          ...paymentData,
-          status: "paid", // Default to paid when manually adding
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setBookings((prev) =>
-        prev.map((b) =>
-          b._id === bookingId
-            ? { ...b, payments: response.data.result.payments }
-            : b
+      setCustomers((prevCustomers) =>
+        prevCustomers.map((c) =>
+          c._id === selectedCustomer
+            ? { ...c, payments: res.data.result.payments } // Update only the matching customer
+            : c
         )
       );
 
-      return true;
+      setShowPaymentForm(false);
+      setNewPayment({
+        amount: 0,
+        method: "online",
+        transactionId: "",
+        receiver: "",
+      });
     } catch (error) {
-      console.error("Payment failed:", error);
-      return false;
+      console.error("Error adding payment:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculatePaymentSummary = (booking) => {
+
+
+  const calculatePaymentSummary = (customer) => {
     const totalPaid =
-      booking.payments?.reduce(
-        (sum, payment) =>
-          payment.status === "paid" ? sum + payment.amount : sum,
-        0
-      ) || 0;
-
-    const balance = Math.max(0, booking.agreedPrice - totalPaid);
-    const paymentProgress =
-      booking.agreedPrice > 0 ? (totalPaid / booking.agreedPrice) * 100 : 0;
-
-    return { totalPaid, balance, paymentProgress };
+      customer.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
+    const balance = Math.max(0, customer.agreedPrice - totalPaid);
+    return { totalPaid, balance };
   };
 
   const handleSaveTrip = async (updatedTrip) => {
@@ -294,19 +266,20 @@ const TripDetailsPage = ({ params }) => {
   };
 
   const handleDelete = async () => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to delete this trip?"
-    );
+    const isConfirmed = window.confirm("Are you sure you want to delete this trip?");
     if (!isConfirmed) return;
     try {
-      await axios.delete(`${ServerUrl}/tripRequirement/deleteTrip`, {
-        data: { _id: tripId },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.delete(
+        `${ServerUrl}/tripRequirement/deleteTrip`,
+        {
+          data: { _id: tripId },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      router.back();
+      router.back()
     } catch (error) {
       console.log(error);
     }
@@ -322,22 +295,10 @@ const TripDetailsPage = ({ params }) => {
 
           <CustomersSection
             customers={customers}
-            bookings={bookings} // Pass bookings to the component
             onAddCustomer={() => setShowCustomerForm(true)}
             onAddPayment={(customerId) => {
-              // Find the booking for this customer
-              const customerBooking = bookings.find(
-                (b) => b.userId === customerId
-              );
-              if (customerBooking) {
-                setSelectedBooking(customerBooking);
-                // Set initial payment amount to the remaining balance
-                setNewPayment((prev) => ({
-                  ...prev,
-                  amount: calculatePaymentSummary(customerBooking).balance,
-                }));
-                setShowPaymentForm(true);
-              }
+              setSelectedCustomer(customerId);
+              setShowPaymentForm(true);
             }}
           />
           <div className="mt-4 w-full flex justify-end">
@@ -352,43 +313,22 @@ const TripDetailsPage = ({ params }) => {
 
         <AddCustomerModal
           isOpen={showCustomerForm}
-          onClose={() => {
-            setShowCustomerForm(false);
-            // Reset form state when closing
-            setNewCustomerBooking({
-              customer: { name: "", contact: "" },
-              booking: {
-                tripId,
-                noOfPeople: 1,
-                agreedPrice: 0,
-                specialRequirements: "",
-                payment: { amount: 0, method: "online" },
-              },
-            });
-          }}
-          tripId={tripId}
-          onSubmit={addCustomerWithBooking}
+          onClose={() => setShowCustomerForm(false)}
+          customerData={newCustomer}
+          onCustomerChange={(field, value) =>
+            setNewCustomer((prev) => ({ ...prev, [field]: value }))
+          }
+          onSubmit={addCustomer}
           loading={loading}
         />
 
         <AddPaymentModal
           isOpen={showPaymentForm}
-          onClose={() => {
-            setShowPaymentForm(false);
-            setSelectedBooking(null); // Clear selected booking
-            setNewPayment({
-              amount: 0,
-              method: "online",
-              transactionId: "",
-              receiver: "",
-              notes: "",
-            });
-          }}
-          booking={selectedBooking} // Now this will work
+          onClose={() => setShowPaymentForm(false)}
+          onSubmit={addPayment}
+          loading={loading}
           payment={newPayment}
           setPayment={setNewPayment}
-          onSubmit={addPaymentToBooking}
-          loading={loading}
         />
       </div>
     </ProtectedRoute>
