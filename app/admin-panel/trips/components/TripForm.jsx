@@ -2,23 +2,19 @@
 import { useEffect, useState } from "react";
 import LocationSelector from "./LocationSelector";
 import Calendar from "./Calendar";
-
 import VehicleSelector from "./VehicleSelector";
 import HotelSelector from "./HotelSelector";
 import PriceInput from "./PriceInput";
 import MealSelector from "./MealSelector";
 import DayItineraryEditor from "./DayItineraryEditor";
-const TripForm = ({ closeForm,onSave, planIds, locations, hotels, vehicles }) => {
-
-
-
+import { ServerUrl } from "@/app/config";
+const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) => {
   const [step, setStep] = useState(1);
   const [tripData, setTripData] = useState({
     slug: "",
     locationId: "",
     pickup: "",
     viaPoints: "",
-   
     startDate: "",
     endDate: "",
     days: 0,
@@ -29,9 +25,11 @@ const TripForm = ({ closeForm,onSave, planIds, locations, hotels, vehicles }) =>
     pricing: { car: {}, bus: {} },
     gst: 18,
   });
-useEffect(() => {
-  console.log('trip data:>>>>', tripData);
-}, [tripData]);
+
+  useEffect(() => {
+    console.log('trip data:>>>>', tripData);
+  }, [tripData]);
+
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrev = () => setStep((prev) => prev - 1);
 
@@ -47,8 +45,34 @@ useEffect(() => {
     });
   };
 
-  const handleIdChange = (e) => {
-    setTripData(prev => ({ ...prev, slug: e.target.value }));
+  const handleIdChange = async (e) => {
+    const selectedSlug = e.target.value;
+    setTripData(prev => ({ ...prev, slug: selectedSlug }));
+
+    if (selectedSlug) {
+      try {
+        const response = await fetch(`${ServerUrl}/tripPlans/getfullItinerary?slug=${selectedSlug}`);
+        const data = await response.json();
+        
+        if (data.responseCode === 200 && data.result && data.result.length > 0) {
+          const tripPlan = data.result[0];
+          const fullItinerary = tripPlan.fullItinerary || [];
+          
+          // Update days and itinerary based on the fetched data
+          setTripData(prev => ({
+            ...prev,
+            days: fullItinerary.length,
+            itinerary: fullItinerary.map(item => ({
+              day: item.day,
+              title: item.title || '',
+              description: item.description || ''
+            }))
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching itinerary:', error);
+      }
+    }
   };
 
   return (
@@ -89,7 +113,6 @@ useEffect(() => {
         <div className="flex-1 overflow-y-auto p-6">
           {step === 1 && (
             <div className="space-y-6">
-              {/* Add this selector at the top of step 1 */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Trip Plan
@@ -131,7 +154,7 @@ useEffect(() => {
                   <DayItineraryEditor
                     key={index}
                     day={index + 1}
-                    content={tripData.itinerary[index]}
+                    content={tripData.itinerary[index] || { day: `Day ${index + 1}`, title: '', description: '' }}
                     onContentChange={handleItineraryChange}
                   />
                 ))}
@@ -191,7 +214,7 @@ useEffect(() => {
               </button>
             ) : (
               <button
-                onClick={()=>onSave(tripData)}
+                onClick={() => onSave(tripData)}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
               >
                 Submit Trip

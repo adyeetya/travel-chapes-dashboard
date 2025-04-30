@@ -286,7 +286,7 @@ const TripDetailsPage = ({ params }) => {
   };
 
   return (
-    <ProtectedRoute adminOnly={true}>
+    <ProtectedRoute allowedAdminTypes={['ADMIN', 'SALES']}>
       <div className="min-h-screen bg-gray-50">
         <TripHeader trip={trip} onBack={() => router.back()} />
 

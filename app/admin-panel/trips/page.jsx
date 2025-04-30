@@ -201,7 +201,7 @@ const TripsPage = () => {
   const isLoading = loading.trips || loading.locations || loading.ids;
 
   return (
-    <ProtectedRoute adminOnly={true}>
+    <ProtectedRoute allowedAdminTypes={['ADMIN', 'SALES']}>
       <div className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">

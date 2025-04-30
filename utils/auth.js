@@ -95,15 +95,29 @@ export const getUserFromToken = () => {
 
 export const getAdminFromToken = () => {
   const token = getToken();
-  if (!token) return null;
+  if (!token) {
+    console.log('No token found');
+    return null;
+  }
 
   const decoded = decodeToken(token);
-  // console.log('decoded:>', decoded)
-  if(decoded?.adminType === 'ADMIN'){
-    return decoded
-  }
-  return null
+  // console.log('Decoded token:', decoded);
   
+  if (!decoded) {
+    console.log('Token could not be decoded');
+    return null;
+  }
+
+  // Return the decoded token if it has an adminType
+  if (decoded.adminType) {
+    return {
+      ...decoded,
+      adminType: decoded.adminType
+    };
+  }
+  
+  console.log('No adminType found in token');
+  return null;
 };
 
 /**

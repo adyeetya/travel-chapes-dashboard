@@ -60,7 +60,7 @@ const AdminTripDetails = ({ params }) => {
   if (!trip) return <div className="p-8">Trip not found</div>;
 
   return (
-    <ProtectedRoute adminOnly={true}>
+    <ProtectedRoute allowedAdminTypes={['ADMIN', 'CONTENT']}>
       <div className="p-6 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto bg-white rounded-lg shadow p-6">
           {/* Header */}

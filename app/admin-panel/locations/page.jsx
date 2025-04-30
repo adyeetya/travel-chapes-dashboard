@@ -116,7 +116,7 @@ const LocationsPage = () => {
   };
 
   return (
-    <ProtectedRoute adminOnly={true}>
+    <ProtectedRoute allowedAdminTypes={['ADMIN', 'SALES']}>
       <div className="min-h-screen p-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
