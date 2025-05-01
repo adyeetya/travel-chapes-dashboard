@@ -191,8 +191,8 @@ const TripsPage = () => {
       setShowForm(false);
       setError("");
     } catch (error) {
-      console.error(error);
-      setError("Failed to create trip");
+      console.error('error in create trip', error);
+      setError(error?.response?.data?.responseMessage || "Failed to create trip");
     } finally {
       setLoading((prev) => ({ ...prev, trips: false }));
     }
@@ -312,76 +312,78 @@ const TripsPage = () => {
           {/* Trips Table */}
           {!isLoading && (
             <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Route
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Dates
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Lowest Price
-                    </th>
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Location
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Route
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Dates
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Lowest Price
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredTrips.map((trip) => (
+                        <tr key={trip._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {trip.locationId?.city || "N/A"}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700">
+                            From {trip.pickup}{" "}
+                            {trip.viaPoints && `via ${trip.viaPoints}`}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {new Date(trip.startDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}{" "}
+                            to{" "}
+                            {new Date(trip.endDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}{" "}
+                            ({trip.days} days)
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {(() => {
+                              const allPrices = Object.values(trip.pricing || {})
+                                .flatMap((option) => Object.values(option))
+                                .filter((price) => typeof price === "number");
 
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredTrips.map((trip) => (
-                    <tr key={trip._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {trip.locationId?.city || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        From {trip.pickup}{" "}
-                        {trip.viaPoints && `via ${trip.viaPoints}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {new Date(trip.startDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        to{" "}
-                        {new Date(trip.endDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        ({trip.days} days)
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {(() => {
-                          const allPrices = Object.values(trip.pricing || {}) // Get all transport types
-                            .flatMap((option) => Object.values(option)) // Flatten all price values
-                            .filter((price) => typeof price === "number"); // Ensure values are numbers
+                              if (allPrices.length === 0) return "N/A";
 
-                          if (allPrices.length === 0) return "N/A";
-
-                          const minPrice = Math.min(...allPrices);
-                          return `₹${minPrice.toLocaleString()}`;
-                        })()}
-                      </td>
-
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Link
-                          href={`/admin-panel/trips/${trip._id}?location=${trip.slug}`}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                              const minPrice = Math.min(...allPrices);
+                              return `₹${minPrice.toLocaleString()}`;
+                            })()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Link
+                              href={`/admin-panel/trips/${trip._id}?location=${trip.slug}`}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              View
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 

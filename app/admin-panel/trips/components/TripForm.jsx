@@ -26,9 +26,7 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
     gst: 18,
   });
 
-  useEffect(() => {
-    console.log('trip data:>>>>', tripData);
-  }, [tripData]);
+
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrev = () => setStep((prev) => prev - 1);
@@ -62,11 +60,7 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
           setTripData(prev => ({
             ...prev,
             days: fullItinerary.length,
-            itinerary: fullItinerary.map(item => ({
-              day: item.day,
-              title: item.title || '',
-              description: item.description || ''
-            }))
+            itinerary: fullItinerary.map(item => item.description || '')
           }));
         }
       } catch (error) {
@@ -154,7 +148,7 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
                   <DayItineraryEditor
                     key={index}
                     day={index + 1}
-                    content={tripData.itinerary[index] || { day: `Day ${index + 1}`, title: '', description: '' }}
+                    content={tripData.itinerary[index] || ''}
                     onContentChange={handleItineraryChange}
                   />
                 ))}

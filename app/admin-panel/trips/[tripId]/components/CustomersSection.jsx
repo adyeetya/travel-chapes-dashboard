@@ -91,6 +91,7 @@ const CustomersTable = ({ customers, onAddPayment }) => {
             <TableHeader>Price</TableHeader>
             <TableHeader>Paid</TableHeader>
             <TableHeader>Balance</TableHeader>
+            <TableHeader>Created By</TableHeader>
             <TableHeader align="right">Actions</TableHeader>
           </tr>
         </thead>
@@ -130,6 +131,12 @@ const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary }) => {
       <TableCell>₹{totalPaid.toLocaleString()}</TableCell>
       <TableCell className={balance > 0 ? "text-red-600" : "text-green-600"}>
         ₹{balance.toLocaleString()}
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{customer.createdBy?.name || customer.createdBy?.email}</span>
+          <span className="text-xs text-gray-500">{customer.createdBy?.mobileNumber}</span>
+        </div>
       </TableCell>
       <TableCell align="right">
         <button

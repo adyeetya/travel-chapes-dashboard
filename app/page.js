@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { MdCardTravel } from "react-icons/md";
-import { FaClipboardList, FaRegCommentAlt, FaUsers} from "react-icons/fa";
+import { FaClipboardList, FaRegCommentAlt, FaUsers, FaUserShield } from "react-icons/fa";
 import Link from "next/link";
 export default function Home() {
   return (
@@ -22,29 +22,35 @@ export default function Home() {
         </section>
 
         {/* Quick Stats */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <Link href="/admin-panel/trips">
-            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6">
+            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
               <MdCardTravel className="text-5xl text-blue-700" />
               <h3 className="mt-4 text-xl font-bold">52</h3>
               <p className="text-gray-600">Trips</p>
             </div>
           </Link>
           <Link href="#">
-            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6">
+            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
               <FaUsers className="text-5xl text-blue-700" />
               <h3 className="mt-4 text-xl font-bold">800</h3>
               <p className="text-gray-600">Customers</p>
             </div>
           </Link>
           <Link href="#">
-          <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6">
-            <FaRegCommentAlt className="text-5xl text-blue-700" />
-            <h3 className="mt-4 text-xl font-bold">120</h3>
-            <p className="text-gray-600">Leads</p>
-          </div>
+            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <FaRegCommentAlt className="text-5xl text-blue-700" />
+              <h3 className="mt-4 text-xl font-bold">120</h3>
+              <p className="text-gray-600">Leads</p>
+            </div>
           </Link>
-         
+          <Link href="/subadmins">
+            <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
+              <FaUserShield className="text-5xl text-blue-700" />
+              <h3 className="mt-4 text-xl font-bold">Manage</h3>
+              <p className="text-gray-600">Subadmins</p>
+            </div>
+          </Link>
         </section>
 
         {/* Featured Destinations */}
