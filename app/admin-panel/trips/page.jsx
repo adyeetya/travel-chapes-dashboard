@@ -64,7 +64,7 @@ const TripsPage = () => {
     fetchHotels();
   }, []);
 
-// fetcvh vehicles
+  // fetcvh vehicles
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
@@ -149,17 +149,17 @@ const TripsPage = () => {
         const pickup = trip.pickup?.toLowerCase() || "";
         const drop = trip.drop?.toLowerCase() || "";
         const viaPoints = trip.viaPoints?.toLowerCase() || "";
-  
+
         const startDate = trip.startDate
           ? new Date(trip.startDate).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            }).toLowerCase() // e.g., "31 Mar 2025"
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }).toLowerCase() // e.g., "31 Mar 2025"
           : "";
-  
+
         const search = searchTerm.toLowerCase();
-  
+
         return (
           city.includes(search) ||
           pickup.includes(search) ||
@@ -168,11 +168,11 @@ const TripsPage = () => {
           startDate.includes(search)
         );
       });
-  
+
       setFilteredTrips(filtered);
     }
   }, [searchTerm, trips]);
-  
+
 
   const handleSave = async (newTrip) => {
     try {
@@ -330,6 +330,9 @@ const TripsPage = () => {
                           Lowest Price
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Customers
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -360,15 +363,20 @@ const TripsPage = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                             {(() => {
-                              const allPrices = Object.values(trip.pricing || {})
-                                .flatMap((option) => Object.values(option))
-                                .filter((price) => typeof price === "number");
+                              if (!trip.pricing || Object.keys(trip.pricing).length === 0) return "N/A";
+                              
+                              const allPrices = Object.values(trip.pricing)
+                                .flatMap(option => Object.values(option))
+                                .filter(price => typeof price === "number");
 
                               if (allPrices.length === 0) return "N/A";
 
                               const minPrice = Math.min(...allPrices);
                               return `₹${minPrice.toLocaleString()}`;
                             })()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {trip.customerCount || 0}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <Link

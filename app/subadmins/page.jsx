@@ -421,6 +421,7 @@ export default function SubAdminsPage() {
                     formErrors.adminType ? 'border-red-500' : ''
                   }`}
                 >
+                  <option value="ADMIN">Admin</option>
                   <option value="CONTENT">Content</option>
                   <option value="SALES">Sales</option>
                 </select>
@@ -531,6 +532,7 @@ export default function SubAdminsPage() {
                     formErrors.adminType ? 'border-red-500' : ''
                   }`}
                 >
+                  <option value="ADMIN">Admin</option>
                   <option value="CONTENT">Content</option>
                   <option value="SALES">Sales</option>
                 </select>
