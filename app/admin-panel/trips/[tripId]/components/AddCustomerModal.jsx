@@ -11,13 +11,8 @@ export const AddCustomerModal = ({
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    const totalPrice = customerData.agreedPrice * customerData.numOfPeople;
-    const updatedCustomerData = {
-      ...customerData,
-      agreedPrice: totalPrice
-    };
-    // console.log("Updated Customer Data:", updatedCustomerData);
-    onSubmit(updatedCustomerData);
+    // Pass the per person price directly, don't multiply here
+    onSubmit(customerData);
   };
 
   return (

@@ -141,10 +141,11 @@ const TripDetailsPage = ({ params }) => {
       setLoading(true);
       const customerData = {
         ...newCustomer,
+        agreedPrice: newCustomer.agreedPrice * newCustomer.numOfPeople, // Calculate total price
         tripId,
       };
 
-
+console.log('customerData',customerData)
 
       // Simulate API delay
       const response = await axios.post(
