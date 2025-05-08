@@ -43,9 +43,40 @@ const TripsPage = () => {
   useEffect(() => {
     const fetchIds = async () => {
       try {
+        console.log('Loading IDs')
         setLoading((prev) => ({ ...prev, ids: true }));
-        const res = await axios.get(`${ServerUrl}/tripPlans/getAllIds`);
-        setPlanIds(res?.data?.result);
+        let allIds = [];
+        let currentPage = 1;
+        let hasMore = true;
+
+        while (hasMore) {
+          console.log('Loading IDs222')
+          const res = await axios.post(`${ServerUrl}/tripPlans/getAllIds`, 
+            {
+              page: currentPage,
+              limit: 10 // Fetch 10 at a time to be efficient
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log('res:', res)
+          if (!res?.data?.result?.docs) {
+            break;
+          }
+
+          const newDocs = res.data.result.docs;
+          allIds = [...allIds, ...newDocs.map(doc => doc.slug)];
+          
+          // Check if we've loaded all pages
+          hasMore = currentPage < res.data.result.totalPages;
+          currentPage++;
+        }
+
+        setPlanIds(allIds);
       } catch (error) {
         handleApiError(error, "fetching plan IDs");
       } finally {
@@ -53,7 +84,7 @@ const TripsPage = () => {
       }
     };
     fetchIds();
-  }, []);
+  }, [token]);
 
   // fetch hotels
   useEffect(() => {
