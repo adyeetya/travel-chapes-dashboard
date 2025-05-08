@@ -20,6 +20,23 @@ const VehiclesPage = () => {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const token = auth.getToken();
+
+  const handleApiError = (error, context) => {
+    if (error.code === "ERR_NETWORK") {
+      setError(`Network error while ${context}. Please check your internet connection.`);
+    } else if (error.response) {
+      // Server responded with error
+      const message = error.response.data?.responseMessage || error.response.statusText;
+      setError(`Error ${context}: ${message} (Status: ${error.response.status})`);
+    } else if (error.request) {
+      // Request made but no response
+      setError(`No response received while ${context}. Please try again.`);
+    } else {
+      // Other errors
+      setError(`Unexpected error while ${context}: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
@@ -36,8 +53,7 @@ const VehiclesPage = () => {
         setVehicles(response.data?.result);
         setFilteredVehicles(response.data?.result);
       } catch (err) {
-        console.error("Error fetching vehicles:", err);
-        setError("Failed to fetch vehicles");
+        handleApiError(err, "fetching vehicles");
       }
     };
     fetchVehicle();
@@ -93,8 +109,7 @@ const VehiclesPage = () => {
       setForm({ name: "", maxPeople: "", type: "", contact: "" });
       setShowModal(false);
     } catch (err) {
-      console.error("Error adding vehicle:", err);
-      setError(err.response?.data?.message || "Failed to add vehicle");
+      handleApiError(err, "adding vehicle");
     } finally {
       setLoading(false);
     }
@@ -123,9 +138,8 @@ const VehiclesPage = () => {
       setFilteredVehicles(
         filteredVehicles.filter((vehicle) => vehicle._id !== id)
       );
-    } catch (error) {
-      console.error("Error deleting location:", err);
-      setError("Failed to delete location");
+    } catch (err) {
+      handleApiError(err, "deleting vehicle");
     }
   };
 

@@ -5,14 +5,13 @@ import { ServerUrl } from "@/app/config";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoutes";
+import { getToken } from "@/utils/auth";
 
 const AdminTripDetails = ({ params }) => {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const tripId = use(params).tripId;
-
-
 
   useEffect(() => {
     const fetchTrip = async () => {
@@ -34,13 +33,12 @@ const AdminTripDetails = ({ params }) => {
   }, [tripId]);
 
   const handleDelete = async () => {
+    const token = getToken();
     try {
       const res = await axios.delete(
         `${ServerUrl}/tripPlans/deleteTripPlan`,
         {
-          params: { _id: tripId },
-        },
-        {
+          data: { _id: tripId },
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -49,7 +47,6 @@ const AdminTripDetails = ({ params }) => {
       );
 
       console.log(res.data);
-
       router.back();
     } catch (error) {
       console.log(error);

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ServerUrl } from "@/app/config";
 import { getToken } from "@/utils/auth";
 import axios from "axios";
@@ -47,6 +47,13 @@ const TripPlanForm = () => {
     errors: null,
   });
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -58,13 +65,21 @@ const TripPlanForm = () => {
 
     try {
       // Validate required fields before submission
-      if (
-        !tripPlan.slug ||
-        !tripPlan.title ||
-        !tripPlan.route ||
-        !tripPlan.minPrice
-      ) {
-        throw new Error("Please fill all required fields");
+      const requiredFields = {
+        'Trip Title': tripPlan.title,
+        'Trip Route': tripPlan.route,
+        'Trip Slug': tripPlan.slug,
+        'Minimum Price': tripPlan.minPrice,
+        'Phone Banner': tripPlan.banners.phone,
+        'Web Banner': tripPlan.banners.web
+      };
+
+      const missingFields = Object.entries(requiredFields)
+        .filter(([_, value]) => !value)
+        .map(([field]) => field);
+
+      if (missingFields.length > 0) {
+        throw new Error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       }
 
       const response = await axios.post(
@@ -77,30 +92,44 @@ const TripPlanForm = () => {
           },
         }
       );
-      console.log("response:", response.data);
+      
       setSubmitStatus({
         success: true,
         message: "Trip plan created successfully!",
         errors: null,
       });
 
+      scrollToTop();
+      
       // Redirect to trip plans list after 2 seconds
-      // setTimeout(() => {
-      //   router.push("/admin/trip-plans");
-      // }, 2000);
+      setTimeout(() => {
+        router.push("/trips");
+      }, 2000);
+
     } catch (error) {
       console.error("Error submitting trip plan:", error);
 
       let errorMessage = "Failed to create trip plan";
       let validationErrors = null;
 
-      if (error.response) {
-        // Handle backend validation errors
-        if (error.response.data?.error?.details) {
-          validationErrors = error.response.data.error.details;
-          errorMessage = "Validation errors occurred";
-        } else if (error.response.data?.message) {
-          errorMessage = error.response.data.message;
+      if (error.response?.data) {
+        const responseData = error.response.data;
+        
+        // Handle specific backend validation messages
+        if (responseData.responseMessage) {
+          errorMessage = responseData.responseMessage
+            .replace('"', '')
+            .replace('"', '')
+            .replace('.', '')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        }
+
+        if (responseData.error?.details) {
+          validationErrors = responseData.error.details;
         }
       } else if (error.message) {
         errorMessage = error.message;
@@ -111,6 +140,8 @@ const TripPlanForm = () => {
         message: errorMessage,
         errors: validationErrors,
       });
+
+      scrollToTop();
     } finally {
       setSubmitting(false);
     }

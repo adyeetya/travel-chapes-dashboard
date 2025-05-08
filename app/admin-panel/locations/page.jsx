@@ -21,6 +21,22 @@ const LocationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const token = auth.getToken();
 
+  const handleApiError = (error, context) => {
+    if (error.code === "ERR_NETWORK") {
+      setError(`Network error while ${context}. Please check your internet connection.`);
+    } else if (error.response) {
+      // Server responded with error
+      const message = error.response.data?.responseMessage || error.response.statusText;
+      setError(`Error ${context}: ${message} (Status: ${error.response.status})`);
+    } else if (error.request) {
+      // Request made but no response
+      setError(`No response received while ${context}. Please try again.`);
+    } else {
+      // Other errors
+      setError(`Unexpected error while ${context}: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -36,8 +52,7 @@ const LocationsPage = () => {
         setLocations(response.data?.result || []);
         setFilteredLocations(response.data?.result || []);
       } catch (err) {
-        console.error("Error fetching locations:", err);
-        setError("Failed to fetch locations");
+        handleApiError(err, "fetching locations");
       }
     };
     fetchLocations();
@@ -81,10 +96,10 @@ const LocationsPage = () => {
       setForm({ city: "", state: "", country: "", description: "" });
       setShowModal(false);
     } catch (err) {
-      console.error("Error adding location:", err);
-      setError(err.response?.data?.message || "Failed to add location");
+      handleApiError(err, "adding location");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDeleteLocation = async (id) => {
@@ -93,7 +108,6 @@ const LocationsPage = () => {
     }
 
     try {
-      // console.log('id',id)
       const data = {
         _id: id,
         type: "location",
@@ -110,8 +124,7 @@ const LocationsPage = () => {
       );
       setLocations(locations.filter((location) => location._id !== id));
     } catch (err) {
-      console.error("Error deleting location:", err);
-      setError("Failed to delete location");
+      handleApiError(err, "deleting location");
     }
   };
 

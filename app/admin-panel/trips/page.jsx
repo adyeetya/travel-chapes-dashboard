@@ -24,6 +24,22 @@ const TripsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const token = auth.getToken();
 
+  const handleApiError = (error, context) => {
+    if (error.code === "ERR_NETWORK") {
+      setError(`Network error while ${context}. Please check your internet connection.`);
+    } else if (error.response) {
+      // Server responded with error
+      const message = error.response.data?.responseMessage || error.response.statusText;
+      setError(`Error ${context}: ${message} (Status: ${error.response.status})`);
+    } else if (error.request) {
+      // Request made but no response
+      setError(`No response received while ${context}. Please try again.`);
+    } else {
+      // Other errors
+      setError(`Unexpected error while ${context}: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     const fetchIds = async () => {
       try {
@@ -31,8 +47,7 @@ const TripsPage = () => {
         const res = await axios.get(`${ServerUrl}/tripPlans/getAllIds`);
         setPlanIds(res?.data?.result);
       } catch (error) {
-        console.error(error);
-        setError("Failed to fetch plan IDs");
+        handleApiError(error, "fetching plan IDs");
       } finally {
         setLoading((prev) => ({ ...prev, ids: false }));
       }
@@ -56,8 +71,7 @@ const TripsPage = () => {
         // console.log('data in get hotel', data)
         setHotels(data?.result || []);
       } catch (err) {
-        console.error("Error fetching hotels:", err);
-        setError("Failed to fetch hotels");
+        handleApiError(err, "fetching hotels");
       }
     };
 
@@ -80,8 +94,7 @@ const TripsPage = () => {
         // console.log('vehicles:',response.data.result)
         setVehicles(response.data?.result);
       } catch (err) {
-        console.error("Error fetching vehicles:", err);
-        setError("Failed to fetch vehicles");
+        handleApiError(err, "fetching vehicles");
       }
     };
     fetchVehicle();
@@ -103,8 +116,7 @@ const TripsPage = () => {
         );
         setLocations(response.data?.result || []);
       } catch (err) {
-        console.error("Error fetching locations:", err);
-        setError("Failed to fetch locations");
+        handleApiError(err, "fetching locations");
       } finally {
         setLoading((prev) => ({ ...prev, locations: false }));
       }
@@ -131,8 +143,7 @@ const TripsPage = () => {
         setTrips(response.data?.result || []);
         setFilteredTrips(response.data?.result || []);
       } catch (err) {
-        console.error("Error fetching trips:", err);
-        setError("Failed to fetch trips");
+        handleApiError(err, "fetching trips");
       } finally {
         setLoading((prev) => ({ ...prev, trips: false }));
       }
@@ -191,8 +202,7 @@ const TripsPage = () => {
       setShowForm(false);
       setError("");
     } catch (error) {
-      console.error('error in create trip', error);
-      setError(error?.response?.data?.responseMessage || "Failed to create trip");
+      handleApiError(error, "creating trip");
     } finally {
       setLoading((prev) => ({ ...prev, trips: false }));
     }

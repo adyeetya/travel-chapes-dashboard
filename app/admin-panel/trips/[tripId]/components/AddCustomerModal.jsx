@@ -10,6 +10,16 @@ export const AddCustomerModal = ({
 }) => {
   if (!isOpen) return null;
 
+  const handleSubmit = () => {
+    const totalPrice = customerData.agreedPrice * customerData.numOfPeople;
+    const updatedCustomerData = {
+      ...customerData,
+      agreedPrice: totalPrice
+    };
+    // console.log("Updated Customer Data:", updatedCustomerData);
+    onSubmit(updatedCustomerData);
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
@@ -38,7 +48,7 @@ export const AddCustomerModal = ({
             onChange={(value) => onCustomerChange("numOfPeople", Number(value))}
           />
           <FormField
-            label="Agreed Price (₹)"
+            label="Agreed Price (per person) (₹)"
             id="price"
             type="number"
             min="0"
@@ -50,7 +60,7 @@ export const AddCustomerModal = ({
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
           <CancelButton onClick={onClose} />
           <SubmitButton 
-            onClick={onSubmit} 
+            onClick={handleSubmit} 
             loading={loading} 
             text="Add Customer" 
           />

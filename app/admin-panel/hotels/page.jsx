@@ -23,6 +23,22 @@ const HotelsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const token = auth.getToken();
 
+  const handleApiError = (error, context) => {
+    if (error.code === "ERR_NETWORK") {
+      setError(`Network error while ${context}. Please check your internet connection.`);
+    } else if (error.response) {
+      // Server responded with error
+      const message = error.response.data?.responseMessage || error.response.statusText;
+      setError(`Error ${context}: ${message} (Status: ${error.response.status})`);
+    } else if (error.request) {
+      // Request made but no response
+      setError(`No response received while ${context}. Please try again.`);
+    } else {
+      // Other errors
+      setError(`Unexpected error while ${context}: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     const fetchHotels = async () => {
       try {
@@ -39,8 +55,7 @@ const HotelsPage = () => {
         setHotels(data?.result || []);
         setFilteredHotels(data?.result || []);
       } catch (err) {
-        console.error("Error fetching hotels:", err);
-        setError("Failed to fetch hotels");
+        handleApiError(err, "fetching hotels");
       }
     };
 
@@ -62,8 +77,7 @@ const HotelsPage = () => {
         console.log(response.data.result);
         setLocations(response.data?.result || []);
       } catch (err) {
-        console.error("Error fetching locations:", err);
-        setError("Failed to fetch locations");
+        handleApiError(err, "fetching locations");
       }
     };
     fetchLocations();
@@ -115,7 +129,7 @@ const HotelsPage = () => {
         contact: "",
       });
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to add hotel");
+      handleApiError(err, "adding hotel");
     } finally {
       setLoading(false);
     }
@@ -144,8 +158,7 @@ const HotelsPage = () => {
       setHotels(hotels.filter((hotel) => hotel._id !== id));
       setFilteredHotels(filteredHotels.filter((hotel) => hotel._id !== id));
     } catch (err) {
-      console.error("Error deleting hotel:", err);
-      setError("Failed to delete hotel");
+      handleApiError(err, "deleting hotel");
     }
   };
 

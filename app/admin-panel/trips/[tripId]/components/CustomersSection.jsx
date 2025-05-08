@@ -88,7 +88,8 @@ const CustomersTable = ({ customers, onAddPayment }) => {
             <TableHeader>Name</TableHeader>
             <TableHeader>Contact</TableHeader>
             <TableHeader>People</TableHeader>
-            <TableHeader>Price</TableHeader>
+            <TableHeader>Price (Per Person)</TableHeader>
+            <TableHeader>Price (Total)</TableHeader>
             <TableHeader>Paid</TableHeader>
             <TableHeader>Balance</TableHeader>
             <TableHeader>Created By</TableHeader>
@@ -127,6 +128,7 @@ const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary }) => {
       <TableCell>{customer.name}</TableCell>
       <TableCell>{customer.contact}</TableCell>
       <TableCell>{customer.numOfPeople}</TableCell>
+      <TableCell>₹{(customer.agreedPrice/customer.numOfPeople).toLocaleString()}</TableCell>
       <TableCell>₹{customer.agreedPrice.toLocaleString()}</TableCell>
       <TableCell>₹{totalPaid.toLocaleString()}</TableCell>
       <TableCell className={balance > 0 ? "text-red-600" : "text-green-600"}>
