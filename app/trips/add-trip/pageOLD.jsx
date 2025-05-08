@@ -15,32 +15,31 @@ import Exclusions from "./components/Exclusions";
 import ImportantPoints from "./components/ImportantPoints";
 import Images from "./components/Images";
 import Link from "next/link";
-
-const defaultTripPlan = {
-  slug: "",
-  title: "",
-  route: "",
-  category: [],
-  ageGroup: "",
-  minPrice: "",
-  banners: { phone: "", web: "" },
-  images: [],
-  metaTitle: "",
-  metaDescription: "",
-  headline: "",
-  description: "",
-  fullItinerary: [],
-  inclusions: [],
-  exclusions: [],
-  importantPoints: [],
-};
-
 const TripPlanForm = () => {
   const router = useRouter();
   const token = getToken();
+  const [tripPlan, setTripPlan] = useState({
+    slug: "",
+    
+    title: "",
 
-  const [tripPlan, setTripPlan] = useState(defaultTripPlan);
-  const [draftRestored, setDraftRestored] = useState(false);
+    route: "",
+
+    category: [],
+    ageGroup: "",
+    minPrice: "",
+    banners: { phone: "", web: "" },
+    images: [],
+    metaTitle: "",
+    metaDescription: "",
+    headline: "",
+    description: "",
+    fullItinerary: [],
+    inclusions: [],
+    exclusions: [],
+    importantPoints: [],
+  });
+
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({
     success: false,
@@ -48,22 +47,11 @@ const TripPlanForm = () => {
     errors: null,
   });
 
-  // Restore draft from sessionStorage
-  useEffect(() => {
-    const saved = sessionStorage.getItem("tripPlanDraft");
-    if (saved) {
-      setTripPlan(JSON.parse(saved));
-      setDraftRestored(true);
-    }
-  }, []);
-
-  // Save to sessionStorage on change
-  useEffect(() => {
-    sessionStorage.setItem("tripPlanDraft", JSON.stringify(tripPlan));
-  }, [tripPlan]);
-
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -76,13 +64,14 @@ const TripPlanForm = () => {
     });
 
     try {
+      // Validate required fields before submission
       const requiredFields = {
-        "Trip Title": tripPlan.title,
-        "Trip Route": tripPlan.route,
-        "Trip Slug": tripPlan.slug,
-        "Minimum Price": tripPlan.minPrice,
-        "Phone Banner": tripPlan.banners.phone,
-        "Web Banner": tripPlan.banners.web,
+        'Trip Title': tripPlan.title,
+        'Trip Route': tripPlan.route,
+        'Trip Slug': tripPlan.slug,
+        'Minimum Price': tripPlan.minPrice,
+        'Phone Banner': tripPlan.banners.phone,
+        'Web Banner': tripPlan.banners.web
       };
 
       const missingFields = Object.entries(requiredFields)
@@ -90,11 +79,7 @@ const TripPlanForm = () => {
         .map(([field]) => field);
 
       if (missingFields.length > 0) {
-        throw new Error(
-          `Please fill in the following required fields: ${missingFields.join(
-            ", "
-          )}`
-        );
+        throw new Error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       }
 
       const response = await axios.post(
@@ -107,19 +92,20 @@ const TripPlanForm = () => {
           },
         }
       );
-
+      
       setSubmitStatus({
         success: true,
         message: "Trip plan created successfully!",
         errors: null,
       });
 
-      sessionStorage.removeItem("tripPlanDraft"); // ✅ Clear draft after success
       scrollToTop();
-
+      
+      // Redirect to trip plans list after 2 seconds
       setTimeout(() => {
         router.push("/trips");
       }, 2000);
+
     } catch (error) {
       console.error("Error submitting trip plan:", error);
 
@@ -128,14 +114,16 @@ const TripPlanForm = () => {
 
       if (error.response?.data) {
         const responseData = error.response.data;
-
+        
+        // Handle specific backend validation messages
         if (responseData.responseMessage) {
           errorMessage = responseData.responseMessage
-            .replace(/"/g, "")
-            .replace(".", "")
-            .split(" ")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
+            .replace('"', '')
+            .replace('"', '')
+            .replace('.', '')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
         } else if (responseData.message) {
           errorMessage = responseData.message;
         }
@@ -186,11 +174,11 @@ const TripPlanForm = () => {
   };
 
   return (
-    <ProtectedRoute allowedAdminTypes={["ADMIN", "CONTENT"]}>
+    <ProtectedRoute allowedAdminTypes={['ADMIN', 'CONTENT']}>
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow-xl rounded-lg p-8">
-            <Link href="/trips" className="flex items-center mb-6">
+            <Link href='/trips' className="flex items-center mb-6">
               <svg
                 className="w-5 h-5 mr-1"
                 fill="none"
@@ -203,30 +191,19 @@ const TripPlanForm = () => {
                   strokeWidth={2}
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
-              </svg>
-              <p>Trips</p>
+              </svg><p>Trips</p>
             </Link>
-
             <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
               Create Trip Plan
             </h1>
 
-            {/* Draft restored notification */}
-            {draftRestored && (
-              <div className="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-900 flex items-center">
-                <FiLoader className="h-5 w-5 mr-2 animate-spin-slow" />
-                <p>Your previous draft has been restored automatically.</p>
-              </div>
-            )}
-
             {/* Status Messages */}
             {submitStatus.message && (
               <div
-                className={`mb-6 p-4 rounded-lg ${
-                  submitStatus.success
+                className={`mb-6 p-4 rounded-lg ${submitStatus.success
                     ? "bg-green-50 text-green-800"
                     : "bg-red-50 text-red-800"
-                }`}
+                  }`}
               >
                 <div className="flex items-center">
                   {submitStatus.success ? (
@@ -242,8 +219,10 @@ const TripPlanForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <BasicInfo tripPlan={tripPlan} setTripPlan={setTripPlan} />
+
               <Categories tripPlan={tripPlan} setTripPlan={setTripPlan} />
               <FullItinerary tripPlan={tripPlan} setTripPlan={setTripPlan} />
+
               <Inclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
               <Exclusions tripPlan={tripPlan} setTripPlan={setTripPlan} />
               <ImportantPoints tripPlan={tripPlan} setTripPlan={setTripPlan} />
@@ -253,14 +232,9 @@ const TripPlanForm = () => {
               <div className="text-center">
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className={`px-8 py-3 text-white rounded-lg transition-colors ${
-                    submitting
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-indigo-600 hover:bg-indigo-700"
-                  }`}
+                  className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  {submitting ? "Submitting..." : "Submit Trip Plan"}
+                  Submit Trip Plan
                 </button>
               </div>
             </form>
