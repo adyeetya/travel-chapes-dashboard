@@ -45,38 +45,24 @@ const TripsPage = () => {
       try {
         console.log('Loading IDs')
         setLoading((prev) => ({ ...prev, ids: true }));
-        let allIds = [];
-        let currentPage = 1;
-        let hasMore = true;
-
-        while (hasMore) {
-          console.log('Loading IDs222')
-          const res = await axios.post(`${ServerUrl}/tripPlans/getAllIds`, 
-            {
-              page: currentPage,
-              limit: 10 // Fetch 10 at a time to be efficient
+        
+        const res = await axios.post(`${ServerUrl}/tripPlans/getAllIds`, 
+          {
+            page: 1,
+            limit: 100 // Fetch all IDs at once
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          console.log('res:', res)
-          if (!res?.data?.result?.docs) {
-            break;
           }
-
-          const newDocs = res.data.result.docs;
-          allIds = [...allIds, ...newDocs.map(doc => doc.slug)];
-          
-          // Check if we've loaded all pages
-          hasMore = currentPage < res.data.result.totalPages;
-          currentPage++;
+        );
+        
+        if (res?.data?.result) {
+          setPlanIds(res.data.result);
+          console.log('planIds', res.data.result)
         }
-
-        setPlanIds(allIds);
       } catch (error) {
         handleApiError(error, "fetching plan IDs");
       } finally {
