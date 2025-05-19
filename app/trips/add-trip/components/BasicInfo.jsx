@@ -2,24 +2,24 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-const BasicInfo = ({ tripPlan, setTripPlan}) => {
+const BasicInfo = ({ tripPlan, setTripPlan }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setTripPlan({ ...tripPlan, [name]: value });
     };
 
     const descriptionEditor = useEditor({
-      extensions: [StarterKit],
-      content: tripPlan.description,
-  
-      immediatelyRender: false,
-  
-      onUpdate: ({ editor }) => {
-        setTripPlan((prev) => ({
-          ...prev,
-          description: editor.getHTML(),
-        }));
-      },
+        extensions: [StarterKit],
+        content: tripPlan.description,
+
+        immediatelyRender: false,
+
+        onUpdate: ({ editor }) => {
+            setTripPlan((prev) => ({
+                ...prev,
+                description: editor.getHTML(),
+            }));
+        },
     });
     return (
         <section className="bg-gray-50 p-6 rounded-lg">
@@ -89,15 +89,15 @@ const BasicInfo = ({ tripPlan, setTripPlan}) => {
                                 1. List
                             </button>
                         </div>
-                        
+
                         {/* Editor content */}
-                        <EditorContent 
+                        <EditorContent
                             editor={descriptionEditor}
                             className="min-h-[200px] p-4 focus:outline-none bg-white"
                         />
                     </div>
                 </div>
-                {['slug', 'title', 'route', 'ageGroup', 'minPrice'].map((field) => (
+                {['slug', 'title', 'city', 'route', 'ageGroup', 'minPrice'].map((field) => (
                     <div key={field}>
                         <label className="block text-sm font-medium text-gray-700 capitalize mb-2">
                             {field.replace(/([A-Z])/g, ' $1').trim()}

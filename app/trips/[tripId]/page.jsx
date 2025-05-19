@@ -65,12 +65,20 @@ const AdminTripDetails = ({ params }) => {
             <h1 className="text-2xl font-bold text-gray-800">
               Trip Details: {trip.name}
             </h1>
-            <button
-              onClick={() => router.back()}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Back
-            </button>
+            <div className="space-x-4">
+              <button
+                onClick={() => router.push(`/trips/${tripId}/edit`)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Edit Trip
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete Trip
+              </button>
+            </div>
           </div>
 
           {/* Basic Info Table */}

@@ -1,8 +1,17 @@
+"use client";
+import RichTextEditor from "./RichTextEditor";
+
 const Inclusions = ({ tripPlan, setTripPlan }) => {
     const handleArrayChange = (e, index) => {
         const { name, value } = e.target;
         const updatedArray = [...tripPlan.inclusions];
         updatedArray[index][name] = value;
+        setTripPlan({ ...tripPlan, inclusions: updatedArray });
+    };
+
+    const handleDescriptionChange = (index, html) => {
+        const updatedArray = [...tripPlan.inclusions];
+        updatedArray[index].description = html;
         setTripPlan({ ...tripPlan, inclusions: updatedArray });
     };
 
@@ -23,7 +32,7 @@ const Inclusions = ({ tripPlan, setTripPlan }) => {
             <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-6">Inclusions</h2>
                 {tripPlan.inclusions.map((inclusion, index) => (
-                    <div key={index} className="space-y-4 mb-4">
+                    <div key={index} className="space-y-4 mb-6">
                         <input
                             type="text"
                             name="title"
@@ -32,14 +41,12 @@ const Inclusions = ({ tripPlan, setTripPlan }) => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             placeholder="Title"
                         />
-                        <textarea
-                            name="description"
-                            value={inclusion.description}
-                            onChange={(e) => handleArrayChange(e, index)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                            placeholder="Description"
-                            rows="2"
-                        />
+                        <div className="border border-gray-300 rounded-lg overflow-hidden">
+                            <RichTextEditor
+                                content={inclusion.description}
+                                onChange={(html) => handleDescriptionChange(index, html)}
+                            />
+                        </div>
                         <button
                             type="button"
                             onClick={() => removeItem(index)}

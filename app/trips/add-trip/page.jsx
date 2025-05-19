@@ -20,6 +20,7 @@ const defaultTripPlan = {
   slug: "",
   title: "",
   route: "",
+  city: "",
   category: [],
   ageGroup: "",
   minPrice: "",

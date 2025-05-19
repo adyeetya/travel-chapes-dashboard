@@ -1,8 +1,17 @@
+"use client";
+import RichTextEditor from "./RichTextEditor";
+
 const ImportantPoints = ({ tripPlan, setTripPlan }) => {
     const handleArrayChange = (e, index) => {
         const { name, value } = e.target;
         const updatedArray = [...tripPlan.importantPoints];
         updatedArray[index][name] = value;
+        setTripPlan({ ...tripPlan, importantPoints: updatedArray });
+    };
+
+    const handleDescriptionChange = (index, html) => {
+        const updatedArray = [...tripPlan.importantPoints];
+        updatedArray[index].description = html;
         setTripPlan({ ...tripPlan, importantPoints: updatedArray });
     };
 
@@ -23,7 +32,7 @@ const ImportantPoints = ({ tripPlan, setTripPlan }) => {
             <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-6">Important Points</h2>
                 {tripPlan.importantPoints.map((point, index) => (
-                    <div key={index} className="space-y-4 mb-4">
+                    <div key={index} className="space-y-4 mb-6">
                         <input
                             type="text"
                             name="title"
@@ -32,14 +41,12 @@ const ImportantPoints = ({ tripPlan, setTripPlan }) => {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                             placeholder="Title"
                         />
-                        <textarea
-                            name="description"
-                            value={point.description}
-                            onChange={(e) => handleArrayChange(e, index)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                            placeholder="Description"
-                            rows="2"
-                        />
+                        <div className="border border-gray-300 rounded-lg overflow-hidden">
+                            <RichTextEditor
+                                content={point.description}
+                                onChange={(html) => handleDescriptionChange(index, html)}
+                            />
+                        </div>
                         <button
                             type="button"
                             onClick={() => removeItem(index)}
