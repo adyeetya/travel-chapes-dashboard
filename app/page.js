@@ -37,7 +37,7 @@ export default function Home() {
               <p className="text-gray-600">Customers</p>
             </div>
           </Link>
-          <Link href="#">
+          <Link href="/leads">
             <div className="flex flex-col items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow">
               <FaRegCommentAlt className="text-5xl text-blue-700" />
               <h3 className="mt-4 text-xl font-bold">120</h3>
