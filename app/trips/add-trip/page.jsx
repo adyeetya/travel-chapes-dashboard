@@ -49,19 +49,57 @@ const TripPlanForm = () => {
     errors: null,
   });
 
-  // Restore draft from sessionStorage
-  useEffect(() => {
-    const saved = sessionStorage.getItem("tripPlanDraft");
-    if (saved) {
-      setTripPlan(JSON.parse(saved));
+  // Restore draft from sessionStorage or localStorage
+useEffect(() => {
+  const savedSession = sessionStorage.getItem("tripPlanDraft");
+  let sessionDraft = null;
+  if (savedSession) {
+    try {
+      sessionDraft = JSON.parse(savedSession);
+    } catch (e) {
+      sessionDraft = null;
+    }
+  }
+
+  // Check if sessionDraft is not empty (not just default values)
+  const isSessionDraftValid =
+    sessionDraft &&
+    Object.keys(sessionDraft).some(
+      (key) =>
+        Array.isArray(sessionDraft[key])
+          ? sessionDraft[key].length > 0
+          : typeof sessionDraft[key] === "object"
+          ? Object.values(sessionDraft[key]).some((v) => v)
+          : sessionDraft[key]
+    );
+
+  if (isSessionDraftValid) {
+    setTripPlan(sessionDraft);
+    setDraftRestored(true);
+  } else {
+    const savedLocal = localStorage.getItem("tripPlanDraft");
+    if (savedLocal) {
+      setTripPlan(JSON.parse(savedLocal));
       setDraftRestored(true);
     }
-  }, []);
+  }
+}, []);
 
   // Save to sessionStorage on change
   useEffect(() => {
     sessionStorage.setItem("tripPlanDraft", JSON.stringify(tripPlan));
   }, [tripPlan]);
+
+  // Save draft to localStorage
+  const handleSaveDraft = () => {
+    localStorage.setItem("tripPlanDraft", JSON.stringify(tripPlan));
+    setSubmitStatus({
+      success: true,
+      message: "Draft saved! You can resume later.",
+      errors: null,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -116,6 +154,7 @@ const TripPlanForm = () => {
       });
 
       sessionStorage.removeItem("tripPlanDraft"); // ✅ Clear draft after success
+      localStorage.removeItem("tripPlanDraft"); 
       scrollToTop();
 
       setTimeout(() => {
@@ -223,11 +262,10 @@ const TripPlanForm = () => {
             {/* Status Messages */}
             {submitStatus.message && (
               <div
-                className={`mb-6 p-4 rounded-lg ${
-                  submitStatus.success
+                className={`mb-6 p-4 rounded-lg ${submitStatus.success
                     ? "bg-green-50 text-green-800"
                     : "bg-red-50 text-red-800"
-                }`}
+                  }`}
               >
                 <div className="flex items-center">
                   {submitStatus.success ? (
@@ -251,17 +289,23 @@ const TripPlanForm = () => {
               <Banners tripPlan={tripPlan} setTripPlan={setTripPlan} />
               <Images tripPlan={tripPlan} setTripPlan={setTripPlan} />
 
-              <div className="text-center">
+              <div className="text-center flex flex-col items-center gap-4">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`px-8 py-3 text-white rounded-lg transition-colors ${
-                    submitting
+                  className={`px-8 py-3 text-white rounded-lg transition-colors ${submitting
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-indigo-600 hover:bg-indigo-700"
-                  }`}
+                    }`}
                 >
                   {submitting ? "Submitting..." : "Submit Trip Plan"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="px-8 py-3 rounded-lg border border-yellow-500 text-yellow-700 bg-yellow-50 hover:bg-yellow-100 transition-colors"
+                >
+                  Save Draft
                 </button>
               </div>
             </form>
