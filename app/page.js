@@ -16,9 +16,14 @@ export default function Home() {
             Explore the world and keep track of your travel bookings, analytics,
             and more.
           </p>
-          <Link href='/trips' className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
+         <div className="flex mt-6 gap-4">
+           <Link href='/trips' className=" px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
             Explore Destinations
           </Link>
+           <Link href='/blogs' className=" px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500">
+            Blogs
+          </Link>
+         </div>
         </section>
 
         {/* Quick Stats */}
