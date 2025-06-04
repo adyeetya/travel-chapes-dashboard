@@ -10,6 +10,11 @@ import DayItineraryEditor from "./DayItineraryEditor";
 import { ServerUrl } from "@/app/config";
 const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) => {
   const [step, setStep] = useState(1);
+  const [dateRanges, setDateRanges] = useState([{
+    startDate: null,
+    endDate: null,
+    days: 0
+  }]);
   const [tripData, setTripData] = useState({
     slug: "",
     locationId: "",
@@ -32,7 +37,20 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
   const handlePrev = () => setStep((prev) => prev - 1);
 
   const updateTripData = (field, value) => {
-    setTripData((prev) => ({ ...prev, [field]: value }));
+    if (field === 'dateRanges') {
+      setDateRanges(value);
+      // Also update the main tripData with the first date range for backward compatibility
+      if (value.length > 0 && value[0].startDate && value[0].endDate) {
+        setTripData(prev => ({
+          ...prev,
+          startDate: value[0].startDate,
+          endDate: value[0].endDate,
+          days: calculateDays(value[0].startDate, value[0].endDate)
+        }));
+      }
+    } else {
+      setTripData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleItineraryChange = (dayIndex, content) => {
@@ -51,23 +69,71 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
       try {
         const response = await fetch(`${ServerUrl}/tripPlans/getfullItinerary?slug=${selectedSlug}`);
         const data = await response.json();
-        
+
         if (data.responseCode === 200 && data.result && data.result.length > 0) {
           const tripPlan = data.result[0];
           const fullItinerary = tripPlan.fullItinerary || [];
-          
+          const requiredDays = fullItinerary.length;
           // Update days and itinerary based on the fetched data
           setTripData(prev => ({
             ...prev,
             days: fullItinerary.length,
             itinerary: fullItinerary.map(item => item.description || '')
           }));
+
+          // Update date ranges with the new day count
+        setDateRanges(prevRanges => 
+          prevRanges.map(range => {
+            if (range.startDate) {
+              const newEndDate = new Date(range.startDate);
+              newEndDate.setDate(newEndDate.getDate() + requiredDays - 1);
+              return { 
+                ...range, 
+                endDate: newEndDate,
+                days: requiredDays
+              };
+            }
+            return range;
+          })
+        );
         }
       } catch (error) {
         console.error('Error fetching itinerary:', error);
       }
     }
   };
+  const calculateDays = (start, end) => {
+    if (!start || !end) return 0;
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+const handleSubmit = async () => {
+  // Filter out any incomplete date ranges
+  console.log('Submitting dateRanges:', dateRanges);
+  const validDateRanges = dateRanges.filter(
+    range => range.startDate && range.endDate && range.days
+  );
+
+  if (validDateRanges.length === 0) {
+    // Fallback to the main tripData if no valid ranges
+    await onSave(tripData);
+    return;
+  }
+
+  // Create a trip for each date range
+  for (const range of validDateRanges) {
+    const tripForRange = {
+      ...tripData,
+      startDate: range.startDate,
+      endDate: range.endDate,
+      days: range.days
+    };
+    console.log('Saving trip for range:', tripForRange);
+    await onSave(tripForRange);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -83,10 +149,9 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
               <div key={stepNumber} className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center 
-                    ${
-                      step >= stepNumber
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-600"
+                    ${step >= stepNumber
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-600"
                     }`}
                 >
                   {stepNumber}
@@ -135,7 +200,9 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
           )}
 
           {step === 2 && (
-            <Calendar tripData={tripData} updateTripData={updateTripData} />
+            <Calendar tripData={tripData}
+              updateTripData={updateTripData}
+              dateRanges={dateRanges} />
           )}
 
           {step === 3 && (
@@ -199,19 +266,19 @@ const TripForm = ({ closeForm, onSave, planIds, locations, hotels, vehicles }) =
               </button>
             )}
 
-            {step < 5 ? (
+            {step === 5 ? (
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+              >
+                Submit {dateRanges.length > 1 ? `${dateRanges.length} Trips` : 'Trip'}
+              </button>
+            ) : (
               <button
                 onClick={handleNext}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
               >
                 Next
-              </button>
-            ) : (
-              <button
-                onClick={() => onSave(tripData)}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
-              >
-                Submit Trip
               </button>
             )}
           </div>
