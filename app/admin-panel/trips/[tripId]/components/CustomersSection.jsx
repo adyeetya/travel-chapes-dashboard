@@ -1,28 +1,39 @@
 "use client";
-
-export const CustomersSection = ({ 
-  customers, 
-  onAddCustomer, 
-  onAddPayment 
+import { useState } from "react";
+import InvoiceModal from "./InvoiceModal";
+export const CustomersSection = ({
+  customers,
+  onAddCustomer,
+  onAddPayment
 }) => {
+  const [invoiceCustomer, setInvoiceCustomer] = useState(null);
+  const handleGenerateInvoice = (cust) => setInvoiceCustomer(cust); // open
+  const closeModal = () => setInvoiceCustomer(null);
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-900">Customers</h2>
-        <button 
+        <button
           onClick={onAddCustomer}
           className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
         >
           + Add Customer
         </button>
       </div>
-      
+
       {customers.length === 0 ? (
         <EmptyCustomersState onAddCustomer={onAddCustomer} />
       ) : (
-        <CustomersTable 
-          customers={customers} 
-          onAddPayment={onAddPayment} 
+        <CustomersTable
+          customers={customers}
+          onAddPayment={onAddPayment}
+          onGenerateInvoice={handleGenerateInvoice}
+        />
+      )}
+      {invoiceCustomer && (
+        <InvoiceModal
+          customer={invoiceCustomer}
+          onClose={closeModal}
         />
       )}
     </div>
@@ -72,7 +83,7 @@ const EmptyCustomersState = ({ onAddCustomer }) => (
   </div>
 );
 
-const CustomersTable = ({ customers, onAddPayment }) => {
+const CustomersTable = ({ customers, onAddPayment, onGenerateInvoice }) => {
   const calculatePaymentSummary = (customer) => {
     const totalPaid =
       customer.payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0;
@@ -98,10 +109,11 @@ const CustomersTable = ({ customers, onAddPayment }) => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {customers.map((customer) => (
-            <CustomerRow 
-              key={customer._id} 
-              customer={customer} 
+            <CustomerRow
+              key={customer._id}
+              customer={customer}
               onAddPayment={onAddPayment}
+              onGenerateInvoice={onGenerateInvoice}
               calculatePaymentSummary={calculatePaymentSummary}
             />
           ))}
@@ -120,15 +132,15 @@ const TableHeader = ({ children, align = "left" }) => (
   </th>
 );
 
-const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary }) => {
+const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary, onGenerateInvoice }) => {
   const { totalPaid, balance } = calculatePaymentSummary(customer);
-  
+
   return (
     <tr className="hover:bg-gray-50">
       <TableCell>{customer.name}</TableCell>
       <TableCell>{customer.contact}</TableCell>
       <TableCell>{customer.numOfPeople}</TableCell>
-      <TableCell>₹{(customer.agreedPrice/customer.numOfPeople).toLocaleString()}</TableCell>
+      <TableCell>₹{(customer.agreedPrice / customer.numOfPeople).toLocaleString()}</TableCell>
       <TableCell>₹{customer.agreedPrice.toLocaleString()}</TableCell>
       <TableCell>₹{totalPaid.toLocaleString()}</TableCell>
       <TableCell className={balance > 0 ? "text-red-600" : "text-green-600"}>
@@ -141,12 +153,20 @@ const CustomerRow = ({ customer, onAddPayment, calculatePaymentSummary }) => {
         </div>
       </TableCell>
       <TableCell align="right">
-        <button
+        <div className="flex flex-col items-end">
+          <button
           onClick={() => onAddPayment(customer._id)}
           className="text-blue-600 hover:text-blue-900"
         >
           Add Payment
         </button>
+        <button
+          onClick={() => onGenerateInvoice(customer)}
+          className="text-blue-600 hover:text-blue-900"
+        >
+         Generate Invoice
+        </button>
+        </div>
       </TableCell>
     </tr>
   );

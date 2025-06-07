@@ -62,7 +62,7 @@ const TripDetailsPage = ({ params }) => {
         );
 
         if (response.data && response.data.result) {
-
+          console.log('response', response.data.result)
           setTrip(response.data.result);
         } else {
           console.error("Unexpected response format:", response);
@@ -145,7 +145,7 @@ const TripDetailsPage = ({ params }) => {
         tripId,
       };
 
-console.log('customerData',customerData)
+      console.log('customerData', customerData)
 
       // Simulate API delay
       const response = await axios.post(
