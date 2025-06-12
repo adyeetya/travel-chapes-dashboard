@@ -63,7 +63,7 @@ const AdminTripDetails = ({ params }) => {
           {/* Back Button */}
           <button
             onClick={() => router.push('/trips')}
-            className="px-4 py-2 bg-blue-300 text-gray-800 rounded hover:bg-blue-400 mb-4"
+            className="px-2 py-1  text-blue-800 hover:underline rounded hover:bg-blue-100 mb-4"
           >
             Back to Trips
           </button>
